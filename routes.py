@@ -164,7 +164,30 @@ def employees_import():
         
         if file and file.filename.lower().endswith('.csv'):
             try:
-                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                # Read the raw bytes first
+                raw_data = file.stream.read()
+                
+                # Try to detect encoding using chardet
+                import chardet
+                detected = chardet.detect(raw_data)
+                encoding = detected['encoding'] if detected['confidence'] > 0.7 else 'utf-8'
+                
+                # Try different encodings in order of preference
+                encodings_to_try = [encoding, 'utf-8', 'latin-1', 'windows-1252', 'iso-8859-1']
+                
+                decoded_data = None
+                for enc in encodings_to_try:
+                    try:
+                        decoded_data = raw_data.decode(enc)
+                        break
+                    except UnicodeDecodeError:
+                        continue
+                
+                if decoded_data is None:
+                    flash('Erreur: Le fichier ne peut pas être lu avec les encodages supportés (UTF-8, Latin-1, Windows-1252). Veuillez vérifier le format du fichier.', 'error')
+                    return redirect(request.url)
+                
+                stream = io.StringIO(decoded_data, newline=None)
                 csv_input = csv.DictReader(stream)
                 
                 imported_count = 0
