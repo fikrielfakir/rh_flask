@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Calcul en Lot avec Assiduité - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-calculator"></i> Calcul en Lot avec Assiduité Excel
+            </h1>
+            <a href="{{ url_for('payroll_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-excel"></i> Télécharger Fichier Excel d'Assiduité
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="salary_month" class="form-label">
+                            <i class="fas fa-calendar"></i> Mois de Salaire <span class="text-danger">*</span>
+                        </label>
+                        <input type="month" class="form-control" id="salary_month" name="salary_month" required
+                               value="{{ datetime.now().strftime('%Y-%m') }}">
+                        <div class="form-text">
+                            Sélectionnez le mois pour lequel calculer les bulletins de paie
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="attendance_file" class="form-label">
+                            <i class="fas fa-upload"></i> Fichier Excel d'Assiduité <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="attendance_file" name="attendance_file" 
+                               accept=".xls,.xlsx" required>
+                        <div class="form-text">
+                            Formats supportés: .xls, .xlsx
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <h6><i class="fas fa-info-circle"></i> Informations importantes:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Format du fichier:</strong> Le fichier Excel doit contenir les colonnes suivantes:
+                                <ul>
+                                    <li>Time (Date/heure)</li>
+                                    <li>Nombre du personnel / Prénom / Last Name</li>
+                                    <li>Numéro de carte</li>
+                                    <li>In / Out Status</li>
+                                </ul>
+                            </li>
+                            <li><strong>Correspondance employés:</strong> Le système associe automatiquement les données d'assiduité aux employés par nom ou numéro de carte</li>
+                            <li><strong>Heures supplémentaires:</strong> Calculées automatiquement basées sur les heures travaillées (> 8h/jour)</li>
+                            <li><strong>Calculs inclus:</strong> Bonus ancienneté, contributions sociales (CNSS/AMO/CIMR), impôt progressif selon la loi marocaine</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-calculator"></i> Calculer Bulletins de Paie avec Assiduité
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-star"></i> Fonctionnalités du Calcul Automatisé
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-clock text-primary"></i> Gestion d'Assiduité</h6>
+                        <ul class="list-unstyled text-muted">
+                            <li>• Calcul automatique des heures travaillées</li>
+                            <li>• Détection des heures supplémentaires</li>
+                            <li>• Pause déjeuner automatique (1h si > 6h)</li>
+                            <li>• Support entrées/sorties multiples</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calculator text-success"></i> Calculs Marocains</h6>
+                        <ul class="list-unstyled text-muted">
+                            <li>• Bonus ancienneté (5% à 25%)</li>
+                            <li>• CNSS, AMO, CIMR avec plafonds</li>
+                            <li>• Impôt progressif par tranches</li>
+                            <li>• Charges familiales</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement en cours...';
+        submitBtn.disabled = true;
+    });
+    
+    // File validation
+    const fileInput = document.getElementById('attendance_file');
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx')) {
+                alert('Veuillez sélectionner un fichier Excel (.xls ou .xlsx)');
+                this.value = '';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

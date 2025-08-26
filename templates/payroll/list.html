@@ -9,9 +9,28 @@
             <h1 class="h2">
                 <i class="fas fa-money-bill"></i> Bulletins de Paie
             </h1>
-            <a href="{{ url_for('payroll_create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Générer Bulletin
-            </a>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('payroll_create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Générer Bulletin
+                </a>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-calculator"></i> Calcul en Lot
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button type="button" class="dropdown-item" onclick="showBatchForm()">
+                                <i class="fas fa-users"></i> Calcul Simple (Tous les Employés)
+                            </button>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('payroll_calculate_batch_with_attendance') }}">
+                                <i class="fas fa-file-excel"></i> Calcul avec Assiduité Excel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -125,4 +144,45 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Batch Calculation Modal -->
+<div class="modal fade" id="batchCalculationModal" tabindex="-1" aria-labelledby="batchCalculationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="batchCalculationModalLabel">
+                    <i class="fas fa-calculator"></i> Calcul en Lot - Tous les Employés
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('payroll_calculate_batch') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="batch_salary_month" class="form-label">Mois de Salaire</label>
+                        <input type="month" class="form-control" id="batch_salary_month" name="salary_month" required 
+                               value="{{ datetime.now().strftime('%Y-%m') }}">
+                    </div>
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Calcul automatique pour tous les employés actifs</h6>
+                        <p class="mb-0">Ce calcul inclura automatiquement: bonus ancienneté, contributions sociales (CNSS/AMO/CIMR), et impôt progressif selon la loi marocaine.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-calculator"></i> Calculer Tous les Bulletins
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showBatchForm() {
+    const modal = new bootstrap.Modal(document.getElementById('batchCalculationModal'));
+    modal.show();
+}
+</script>
+
 {% endblock %}

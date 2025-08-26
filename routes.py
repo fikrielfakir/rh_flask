@@ -809,3 +809,103 @@ def payroll_calculate_batch():
         flash(f'Erreur lors du calcul en lot: {str(e)}', 'error')
     
     return redirect(url_for('payroll_list'))
+
+@app.route('/payroll/calculate-batch-with-attendance', methods=['GET', 'POST'])
+def payroll_calculate_batch_with_attendance():
+    """Calculate payroll for all employees using Excel attendance data"""
+    if request.method == 'GET':
+        return render_template('payroll/batch_with_attendance.html')
+    
+    salary_month = request.form.get('salary_month')
+    if not salary_month:
+        flash('Mois de salaire requis', 'error')
+        return redirect(url_for('payroll_list'))
+    
+    # Check if file was uploaded
+    if 'attendance_file' not in request.files:
+        flash('Fichier Excel d\'assiduité requis', 'error')
+        return render_template('payroll/batch_with_attendance.html')
+    
+    file = request.files['attendance_file']
+    if file.filename == '':
+        flash('Aucun fichier sélectionné', 'error')
+        return render_template('payroll/batch_with_attendance.html')
+    
+    if not file.filename.lower().endswith(('.xls', '.xlsx')):
+        flash('Format de fichier non supporté. Utilisez Excel (.xls ou .xlsx)', 'error')
+        return render_template('payroll/batch_with_attendance.html')
+    
+    try:
+        # Save uploaded file temporarily
+        import tempfile
+        import os
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xls') as tmp_file:
+            file.save(tmp_file.name)
+            temp_file_path = tmp_file.name
+        
+        # Process attendance data
+        from attendance_processor import AttendanceProcessor
+        from simple_payroll_calculator import calculate_simple_payslip
+        
+        processor = AttendanceProcessor(temp_file_path)
+        attendance_summary = processor.get_attendance_summary(salary_month)
+        
+        # Clean up temp file
+        os.unlink(temp_file_path)
+        
+        # Calculate payroll with attendance data
+        employees = Employee.query.filter_by(is_active=1).all()
+        successful_calculations = 0
+        total_errors = []
+        attendance_matched = attendance_summary['matched_employees']
+        
+        for employee in employees:
+            try:
+                # Get attendance data for this employee if available
+                employee_attendance = attendance_summary['attendance_data'].get(employee.id, {})
+                
+                overtime_hours = employee_attendance.get('overtime_hours', 0)
+                leave_allowance = 0  # Can be extended to include leave calculations
+                
+                # Calculate payslip with attendance-based overtime
+                payslip, errors = calculate_simple_payslip(
+                    employee.id, 
+                    salary_month, 
+                    overtime_hours, 
+                    leave_allowance
+                )
+                
+                if payslip:
+                    successful_calculations += 1
+                    # Add attendance info to payslip comments
+                    if employee_attendance:
+                        days_worked = employee_attendance.get('days_worked', 0)
+                        total_hours = employee_attendance.get('total_hours', 0)
+                        payslip.comments = f"Jours travaillés: {days_worked}, Heures totales: {total_hours:.1f}, Heures sup.: {overtime_hours:.1f}"
+                        db.session.commit()
+                
+                if errors:
+                    total_errors.extend([f"{employee.name}: {error}" for error in errors])
+                    
+            except Exception as e:
+                total_errors.append(f"{employee.name}: {str(e)}")
+        
+        # Success messages
+        flash(f'{successful_calculations} fiches de paie calculées avec données d\'assiduité!', 'success')
+        flash(f'Assiduité intégrée pour {attendance_matched} employés sur {attendance_summary["total_records"]} enregistrements', 'info')
+        flash('Calculs incluant: heures supplémentaires, bonus ancienneté, CNSS/AMO/CIMR, et impôt progressif', 'info')
+        
+        if total_errors:
+            flash(f'{len(total_errors)} erreurs rencontrées lors du calcul', 'warning')
+        
+        # Show unmatched employees warning
+        unmatched = attendance_summary['unmatched_count']
+        if unmatched > 0:
+            flash(f'{unmatched} employés du fichier Excel non trouvés dans la base de données', 'warning')
+            
+    except Exception as e:
+        flash(f'Erreur lors du traitement du fichier: {str(e)}', 'error')
+        return render_template('payroll/batch_with_attendance.html')
+    
+    return redirect(url_for('payroll_list'))

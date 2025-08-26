@@ -43,7 +43,7 @@ Design preferences: Modern, tablet-friendly design with blue color scheme (#003E
 
 # Recent Changes
 
-## Migration Completed (26/08/2025)
+## Migration & Excel Attendance Integration Completed (26/08/2025)
 - **Project Migration**: Successfully migrated from Replit Agent to Replit environment
 - **Package Installation**: Installed all required Python dependencies (Flask, SQLAlchemy, gunicorn, etc.)
 - **JavaScript Fix**: Fixed setupTouchSearchHandlers error in main.js
@@ -52,6 +52,12 @@ Design preferences: Modern, tablet-friendly design with blue color scheme (#003E
   - CSV import with validation and error handling
   - Import template download feature
   - Enhanced UI with Actions dropdown menu
+- **Excel Attendance Integration**: New bulk payroll calculation with Excel attendance data
+  - Automatic processing of Excel attendance files (.xls/.xlsx)
+  - Employee matching by name or card number
+  - Automatic overtime calculation based on worked hours
+  - Enhanced payroll calculation with real attendance data
+  - French-language interface for Moroccan businesses
 
 ## Employee Management Enhancements
 - **Import Features**: CSV import with comprehensive validation

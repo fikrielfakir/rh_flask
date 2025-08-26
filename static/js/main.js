@@ -68,7 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Performance optimizations
-    setupPerformanceOptimizations();
+    if (typeof setupPerformanceOptimizations === 'function') {
+        setupPerformanceOptimizations();
+    }
 
     console.log('Ceramica HR System initialized successfully');
 });
