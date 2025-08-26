@@ -60,6 +60,25 @@ Design preferences: Modern, tablet-friendly design with blue color scheme (#003E
 - **Error Handling**: Detailed error reporting for import operations
 - **User Interface**: Added Actions dropdown with import/export options
 
+## Moroccan Payroll System Implementation (26/08/2025)
+- **Comprehensive Payroll Calculator**: Implemented full Moroccan labor law compliance
+  - Base salary calculations with attendance-based adjustments
+  - Overtime payments (25%, 50%, 100% rates for different scenarios)
+  - Paid leave and holiday payment calculations
+  - Automatic seniority bonus (5-25% based on years of service)
+  - Social security contributions (CNSS, AMO, CIMR) with proper ceilings
+  - Professional expenses deduction (35%/25% based on salary level)
+  - Progressive income tax (IR) calculation with family allowances
+  - Automatic retirement event creation for eligible employees
+- **Enhanced Database Models**: Extended PaySlip model with detailed calculation fields
+- **Calculation Features**: 
+  - Handles complex overtime scenarios (regular, weekend, holiday)
+  - Family allowances that reduce income tax burden
+  - CNSS contribution ceiling of 6,000 MAD enforcement
+  - Automatic advance payment and loan deduction handling
+- **Batch Processing**: Added batch payroll calculation for all employees
+- **Compliance Features**: Full adherence to Moroccan tax brackets and social security rates
+
 # External Dependencies
 
 ## Core Dependencies

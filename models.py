@@ -144,6 +144,9 @@ class AllowanceOption(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(191), nullable=False)
+    amount = db.Column(db.Numeric(15, 2), nullable=False, default=0)
+    is_taxable = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=True)
     created_by = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -153,6 +156,9 @@ class DeductionOption(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(191), nullable=False)
+    amount = db.Column(db.Numeric(15, 2), nullable=False, default=0)
+    is_percentage = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
     created_by = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -264,21 +270,101 @@ class PaySlip(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
-    net_payble = db.Column(db.Numeric(15, 2), nullable=False)
     salary_month = db.Column(db.String(191), nullable=False)
-    status = db.Column(db.Integer, default=0)
-    basic_salary = db.Column(db.Numeric(15, 2), nullable=False)
-    allowance = db.Column(db.Numeric(15, 2), default=0)
-    commission = db.Column(db.Numeric(15, 2), default=0)
-    loan = db.Column(db.Numeric(15, 2), default=0)
-    saturation_deduction = db.Column(db.Numeric(15, 2), default=0)
-    other_payment = db.Column(db.Numeric(15, 2), default=0)
-    overtime = db.Column(db.Numeric(15, 2), default=0)
+    status = db.Column(db.String(50), default='draft')  # draft, approved, paid
+    
+    # Basic Salary Components
+    base_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    days_worked = db.Column(db.Integer, default=26)
+    actual_working_hours = db.Column(db.Numeric(8, 2), default=191)
+    monthly_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    
+    # Leave and Holiday Payments
+    paid_leave_amount = db.Column(db.Numeric(15, 2), default=0)
+    paid_holiday_amount = db.Column(db.Numeric(15, 2), default=0)
+    leave_days = db.Column(db.Integer, default=0)
+    holiday_days = db.Column(db.Integer, default=0)
+    
+    # Overtime Payments
+    overtime_regular_hours = db.Column(db.Numeric(8, 2), default=0)  # 25%
+    overtime_weekend_hours = db.Column(db.Numeric(8, 2), default=0)  # 50%
+    overtime_holiday_hours = db.Column(db.Numeric(8, 2), default=0)  # 100%
+    overtime_regular_amount = db.Column(db.Numeric(15, 2), default=0)
+    overtime_weekend_amount = db.Column(db.Numeric(15, 2), default=0)
+    overtime_holiday_amount = db.Column(db.Numeric(15, 2), default=0)
+    total_overtime_amount = db.Column(db.Numeric(15, 2), default=0)
+    
+    # Taxable Salary Components
+    taxable_basic_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    seniority_bonus_rate = db.Column(db.Numeric(5, 2), default=0)  # 5-25%
+    seniority_bonus_amount = db.Column(db.Numeric(15, 2), default=0)
+    taxable_allowances = db.Column(db.Numeric(15, 2), default=0)
+    non_taxable_allowances = db.Column(db.Numeric(15, 2), default=0)
+    
+    # Gross Salary
+    gross_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    gross_taxable_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    
+    # Social Security Contributions
+    cnss_rate = db.Column(db.Numeric(5, 4), default=0.0448)  # 4.48%
+    cnss_amount = db.Column(db.Numeric(15, 2), default=0)
+    amo_rate = db.Column(db.Numeric(5, 4), default=0.0226)  # 2.26%
+    amo_amount = db.Column(db.Numeric(15, 2), default=0)
+    cimr_rate = db.Column(db.Numeric(5, 4), default=0.07)  # 7%
+    cimr_amount = db.Column(db.Numeric(15, 2), default=0)
+    professional_expenses_rate = db.Column(db.Numeric(5, 4), default=0.35)  # 35% or 25%
+    professional_expenses_amount = db.Column(db.Numeric(15, 2), default=0)
+    
+    # Tax Calculations
+    net_taxable_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    gross_ir = db.Column(db.Numeric(15, 2), default=0)
+    family_allowance = db.Column(db.Numeric(15, 2), default=0)
+    net_ir = db.Column(db.Numeric(15, 2), default=0)
+    
+    # Final Calculations
+    total_deductions = db.Column(db.Numeric(15, 2), nullable=False)
+    net_salary = db.Column(db.Numeric(15, 2), nullable=False)
+    advance_payments = db.Column(db.Numeric(15, 2), default=0)
+    loans = db.Column(db.Numeric(15, 2), default=0)
+    net_payable = db.Column(db.Numeric(15, 2), nullable=False)
+    
+    # Employee Information (for calculation context)
+    years_of_service = db.Column(db.Integer, default=0)
+    is_married = db.Column(db.Boolean, default=False)
+    number_of_children = db.Column(db.Integer, default=0)
+    
     created_by = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     employee = db.relationship('Employee', backref='pay_slips')
+
+
+
+class PayrollConfiguration(db.Model):
+    __tablename__ = 'payroll_configurations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    config_key = db.Column(db.String(100), unique=True, nullable=False)
+    config_value = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class RetirementEvent(db.Model):
+    __tablename__ = 'retirement_events'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+    retirement_date = db.Column(db.Date, nullable=False)
+    notification_date = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String(50), default='scheduled')  # scheduled, notified, processed
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    employee = db.relationship('Employee', backref='retirement_events')
 
 class Advance(db.Model):
     __tablename__ = 'advances'
@@ -288,6 +374,7 @@ class Advance(db.Model):
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     date = db.Column(db.Date, nullable=False)
     reason = db.Column(db.String(191))
+    status = db.Column(db.String(50), default='active')  # active, deducted
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

@@ -692,32 +692,108 @@ def payroll_list():
 def payroll_create():
     form = PayrollForm()
     if form.validate_on_submit():
-        # Calculate net payable
-        basic_salary = form.basic_salary.data or 0
-        allowance = form.allowance.data or 0
-        commission = form.commission.data or 0
-        other_payment = form.other_payment.data or 0
-        overtime = form.overtime.data or 0
-        loan = form.loan.data or 0
-        saturation_deduction = form.saturation_deduction.data or 0
-        
-        net_payable = (basic_salary + allowance + commission + other_payment + overtime - loan - saturation_deduction)
-        
-        payroll = PaySlip(
-            employee_id=form.employee_id.data,
-            salary_month=form.salary_month.data,
-            basic_salary=basic_salary,
-            allowance=allowance,
-            commission=commission,
-            loan=loan,
-            saturation_deduction=saturation_deduction,
-            other_payment=other_payment,
-            overtime=overtime,
-            net_payable=net_payable,
-            created_by=1
-        )
-        db.session.add(payroll)
-        db.session.commit()
-        flash('Fiche de paie créée avec succès!', 'success')
-        return redirect(url_for('payroll_list'))
+        try:
+            # Import the payroll calculator
+            from payroll_calculator import calculate_employee_payslip
+            
+            # Get form data
+            employee_id = form.employee_id.data
+            salary_month = form.salary_month.data
+            
+            # Prepare calculation data (these could come from forms or database)
+            attendance_data = {
+                'days_worked': 26,  # This could come from attendance records
+                'holiday_days': 0
+            }
+            
+            overtime_data = {
+                'regular_overtime_hours': float(form.overtime.data or 0) / 8,  # Convert amount to hours estimate
+                'weekend_overtime_hours': 0,
+                'holiday_overtime_hours': 0
+            }
+            
+            leave_data = {
+                'approved_leave_days': 0,
+                'holiday_days': 0,
+                'worked_on_holidays': False
+            }
+            
+            # Calculate payslip using Moroccan labor law
+            payslip, errors = calculate_employee_payslip(
+                employee_id, 
+                salary_month, 
+                attendance_data, 
+                overtime_data, 
+                leave_data
+            )
+            
+            if payslip:
+                flash('Fiche de paie calculée et créée avec succès selon la loi marocaine!', 'success')
+                if errors:
+                    for error in errors:
+                        flash(f'Avertissement: {error}', 'warning')
+                return redirect(url_for('payroll_view', id=payslip.id))
+            else:
+                for error in errors:
+                    flash(f'Erreur de calcul: {error}', 'error')
+                return redirect(request.url)
+                
+        except Exception as e:
+            flash(f'Erreur lors du calcul de la paie: {str(e)}', 'error')
+            return redirect(request.url)
+    
     return render_template('payroll/create.html', form=form)
+
+@app.route('/payroll/<int:id>')
+def payroll_view(id):
+    """View detailed payslip"""
+    payslip = PaySlip.query.get_or_404(id)
+    return render_template('payroll/view.html', payslip=payslip)
+
+@app.route('/payroll/calculate-batch', methods=['POST'])
+def payroll_calculate_batch():
+    """Calculate payroll for all employees for a given month"""
+    salary_month = request.form.get('salary_month')
+    if not salary_month:
+        flash('Mois de salaire requis', 'error')
+        return redirect(url_for('payroll_list'))
+    
+    try:
+        from payroll_calculator import calculate_employee_payslip
+        
+        # Get all active employees
+        employees = Employee.query.filter_by(is_active=1).all()
+        successful_calculations = 0
+        total_errors = []
+        
+        for employee in employees:
+            try:
+                # Basic attendance data (this could be enhanced to get real attendance)
+                attendance_data = {'days_worked': 26, 'holiday_days': 0}
+                overtime_data = {'regular_overtime_hours': 0, 'weekend_overtime_hours': 0, 'holiday_overtime_hours': 0}
+                leave_data = {'approved_leave_days': 0, 'holiday_days': 0, 'worked_on_holidays': False}
+                
+                payslip, errors = calculate_employee_payslip(
+                    employee.id, 
+                    salary_month, 
+                    attendance_data, 
+                    overtime_data, 
+                    leave_data
+                )
+                
+                if payslip:
+                    successful_calculations += 1
+                if errors:
+                    total_errors.extend([f"{employee.name}: {error}" for error in errors])
+                    
+            except Exception as e:
+                total_errors.append(f"{employee.name}: {str(e)}")
+        
+        flash(f'{successful_calculations} fiches de paie calculées avec succès!', 'success')
+        if total_errors:
+            flash(f'{len(total_errors)} erreurs rencontrées lors du calcul', 'warning')
+            
+    except Exception as e:
+        flash(f'Erreur lors du calcul en lot: {str(e)}', 'error')
+    
+    return redirect(url_for('payroll_list'))

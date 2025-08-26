@@ -61,7 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupPrintHandlers();
 
     // Tablet-optimized data tables
-    setupTabletDataTables();
+    if (typeof setupTabletDataTables === 'function') {
+        setupTabletDataTables();
+    } else {
+        setupDataTableEnhancements();
+    }
 
     // Performance optimizations
     setupPerformanceOptimizations();
