@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Document - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Télécharger un Document - {{ employee.name }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-file me-2"></i>
+                                        Informations du Document
+                                    </h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.document_type.label(class="form-label") }}
+                                        {{ form.document_type(class="form-select") }}
+                                        {% if form.document_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.document_type.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.document_name.label(class="form-label") }}
+                                        {{ form.document_name(class="form-control") }}
+                                        {% if form.document_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.document_name.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.expiry_date.label(class="form-label") }}
+                                        {{ form.expiry_date(class="form-control") }}
+                                        <div class="form-text">Optionnel - uniquement pour les documents avec date d'expiration</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                        Fichier à Télécharger
+                                    </h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.file.label(class="form-label") }}
+                                        {{ form.file(class="form-control") }}
+                                        {% if form.file.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.file.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Formats acceptés: PDF, JPG, PNG, DOC, DOCX<br>
+                                            Taille maximale: 5 MB
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Information:</strong> Les documents téléchargés seront stockés de manière sécurisée et ne seront accessibles qu'aux personnes autorisées.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ url_for('employees_view', id=employee.id) }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>
+                                        Télécharger le Document
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Prévisualisation du fichier
+document.querySelector('#file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        // Afficher les informations du fichier
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'mt-2 p-2 bg-light rounded';
+        fileInfo.innerHTML = `
+            <small>
+                <strong>Fichier sélectionné:</strong> ${fileName}<br>
+                <strong>Taille:</strong> ${fileSize} MB
+            </small>
+        `;
+        
+        // Supprimer l'ancienne info si elle existe
+        const existingInfo = e.target.parentNode.querySelector('.mt-2');
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+        
+        e.target.parentNode.appendChild(fileInfo);
+    }
+});
+</script>
+{% endblock %}

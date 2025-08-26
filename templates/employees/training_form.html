@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Formation{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Nouvelle Formation
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Informations de la Formation
+                                    </h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.employee_id.label(class="form-label") }}
+                                        {{ form.employee_id(class="form-select") }}
+                                        {% if form.employee_id.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.employee_id.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.training_title.label(class="form-label") }}
+                                        {{ form.training_title(class="form-control") }}
+                                        {% if form.training_title.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.training_title.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.training_provider.label(class="form-label") }}
+                                        {{ form.training_provider(class="form-control") }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.training_type.label(class="form-label") }}
+                                        {{ form.training_type(class="form-select") }}
+                                        {% if form.training_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.training_type.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-calendar me-2"></i>
+                                        Dates et Détails
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.start_date.label(class="form-label") }}
+                                                {{ form.start_date(class="form-control") }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.end_date.label(class="form-label") }}
+                                                {{ form.end_date(class="form-control") }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.duration_hours.label(class="form-label") }}
+                                                {{ form.duration_hours(class="form-control") }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.cost.label(class="form-label") }}
+                                                {{ form.cost(class="form-control", step="0.01") }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5 class="mb-3">
+                                <i class="fas fa-sticky-note me-2"></i>
+                                Notes Additionnelles
+                            </h5>
+                            
+                            <div class="mb-3">
+                                {{ form.notes.label(class="form-label") }}
+                                {{ form.notes(class="form-control", rows="4", placeholder="Notes sur la formation, objectifs, compétences acquises...") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        Enregistrer la Formation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

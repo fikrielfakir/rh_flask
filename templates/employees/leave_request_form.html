@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Demande de Congé{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Nouvelle Demande de Congé
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-user me-2"></i>
+                                        Informations de la Demande
+                                    </h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.employee_id.label(class="form-label") }}
+                                        {{ form.employee_id(class="form-select") }}
+                                        {% if form.employee_id.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.employee_id.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.leave_type.label(class="form-label") }}
+                                        {{ form.leave_type(class="form-select") }}
+                                        {% if form.leave_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.leave_type.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-calendar me-2"></i>
+                                        Période de Congé
+                                    </h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.start_date.label(class="form-label") }}
+                                        {{ form.start_date(class="form-control") }}
+                                        {% if form.start_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.start_date.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.end_date.label(class="form-label") }}
+                                        {{ form.end_date(class="form-control") }}
+                                        {% if form.end_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.end_date.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5 class="mb-3">
+                                <i class="fas fa-comment me-2"></i>
+                                Raison du Congé
+                            </h5>
+                            
+                            <div class="mb-3">
+                                {{ form.reason.label(class="form-label") }}
+                                {{ form.reason(class="form-control", rows="4", placeholder="Veuillez expliquer la raison de votre demande de congé...") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Soumettre la Demande
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
