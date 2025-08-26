@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Import Employés - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-upload"></i> Import Employés
+            </h1>
+            <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-csv text-success me-2"></i>
+                    Télécharger des employés depuis un fichier CSV
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Fichier CSV</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">
+                            Veuillez sélectionner un fichier CSV contenant les données des employés.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('employees_import_template') }}" class="btn btn-outline-info me-md-2">
+                            <i class="fas fa-download"></i> Télécharger le modèle
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-upload"></i> Importer les employés
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-info me-2"></i>
+                    Instructions
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Format de fichier requis:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Format CSV (UTF-8)</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Première ligne: en-têtes</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Données séparées par virgule</li>
+                </ul>
+                
+                <h6 class="mt-3">Colonnes requises:</h6>
+                <ul class="small">
+                    <li><strong>ID Employé</strong> - Unique</li>
+                    <li><strong>Nom</strong> - Nom complet</li>
+                    <li><strong>Email</strong> - Unique</li>
+                    <li><strong>Branche</strong> - Doit exister</li>
+                    <li><strong>Département</strong> - Doit exister</li>
+                </ul>
+                
+                <h6 class="mt-3">Formats de date:</h6>
+                <p class="small mb-0">Utilisez le format <code>JJ/MM/AAAA</code><br>
+                Exemple: <code>15/03/1990</code></p>
+                
+                <div class="alert alert-warning mt-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Les branches et départements doivent déjà exister dans le système.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table text-primary me-2"></i>
+                    Exemple de structure CSV
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID Employé</th>
+                                <th>Nom</th>
+                                <th>CIN</th>
+                                <th>Email</th>
+                                <th>Branche</th>
+                                <th>Département</th>
+                                <th>Date d'embauche</th>
+                                <th>Salaire</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>EMP001</td>
+                                <td>Ahmed Alami</td>
+                                <td>AB123456</td>
+                                <td>ahmed.alami@ceramica.ma</td>
+                                <td>Casablanca</td>
+                                <td>Ressources Humaines</td>
+                                <td>01/01/2024</td>
+                                <td>8000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Cette table montre seulement quelques colonnes principales. Le fichier complet contient toutes les informations d'employé.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

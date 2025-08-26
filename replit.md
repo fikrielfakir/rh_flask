@@ -41,6 +41,25 @@ Design preferences: Modern, tablet-friendly design with blue color scheme (#003E
 **Template Organization**: Structured template hierarchy with feature-specific directories
 **Static Assets**: Custom CSS and JavaScript with CDN dependencies for Bootstrap and Font Awesome
 
+# Recent Changes
+
+## Migration Completed (26/08/2025)
+- **Project Migration**: Successfully migrated from Replit Agent to Replit environment
+- **Package Installation**: Installed all required Python dependencies (Flask, SQLAlchemy, gunicorn, etc.)
+- **JavaScript Fix**: Fixed setupTouchSearchHandlers error in main.js
+- **Bulk Operations**: Added bulk import/export functionality for employees section
+  - CSV export of all employee data
+  - CSV import with validation and error handling
+  - Import template download feature
+  - Enhanced UI with Actions dropdown menu
+
+## Employee Management Enhancements
+- **Import Features**: CSV import with comprehensive validation
+- **Export Features**: Full employee data export to CSV format
+- **Template System**: Downloadable CSV template with example data
+- **Error Handling**: Detailed error reporting for import operations
+- **User Interface**: Added Actions dropdown with import/export options
+
 # External Dependencies
 
 ## Core Dependencies

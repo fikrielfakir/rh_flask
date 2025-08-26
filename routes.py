@@ -1,4 +1,8 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, make_response, send_file
+import csv
+import io
+from werkzeug.utils import secure_filename
+import os
 from app import app, db
 from models import (
     User, Branch, Department, Designation, Employee, AttendanceEmployee, 
@@ -97,6 +101,227 @@ def employees_list():
     )
     
     return render_template('employees/list.html', employees=employees, search=search)
+
+@app.route('/employees/export')
+def employees_export():
+    """Export employees to CSV"""
+    employees = Employee.query.filter_by(is_active=1).join(Branch, isouter=True).join(Department, isouter=True).all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'ID Employé', 'Nom', 'CIN', 'Téléphone', 'Adresse', 'Email',
+        'Branche', 'Département', 'Date d\'embauche', 'Salaire',
+        'Date de naissance', 'Genre', 'Statut matrimonial', 'Nationalité',
+        'Groupe sanguin', 'Type de contrat', 'Statut d\'emploi'
+    ])
+    
+    # Write employee data
+    for employee in employees:
+        writer.writerow([
+            employee.employee_id,
+            employee.name,
+            employee.cin,
+            employee.phone,
+            employee.address,
+            employee.email,
+            employee.branch.name if employee.branch else '',
+            employee.department.name if employee.department else '',
+            employee.company_doj.strftime('%d/%m/%Y') if employee.company_doj else '',
+            employee.salary if employee.salary else '',
+            employee.date_of_birth.strftime('%d/%m/%Y') if employee.date_of_birth else '',
+            employee.gender if employee.gender else '',
+            employee.marital_status if employee.marital_status else '',
+            employee.nationality if employee.nationality else '',
+            employee.blood_group if employee.blood_group else '',
+            employee.contract_type if employee.contract_type else '',
+            employee.employment_status if employee.employment_status else ''
+        ])
+    
+    output.seek(0)
+    
+    # Create response
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=employes_export.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8"
+    
+    return response
+
+@app.route('/employees/import', methods=['GET', 'POST'])
+def employees_import():
+    """Import employees from CSV"""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('Aucun fichier sélectionné', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('Aucun fichier sélectionné', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.csv'):
+            try:
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.DictReader(stream)
+                
+                imported_count = 0
+                errors = []
+                
+                for row_num, row in enumerate(csv_input, start=2):
+                    try:
+                        # Check if employee already exists
+                        existing_employee = Employee.query.filter_by(employee_id=row.get('ID Employé', '').strip()).first()
+                        if existing_employee:
+                            errors.append(f"Ligne {row_num}: Employé avec ID '{row.get('ID Employé', '').strip()}' existe déjà")
+                            continue
+                        
+                        # Check email uniqueness
+                        if row.get('Email', '').strip():
+                            existing_email = Employee.query.filter_by(email=row.get('Email', '').strip()).first()
+                            if existing_email:
+                                errors.append(f"Ligne {row_num}: Email '{row.get('Email', '').strip()}' déjà utilisé")
+                                continue
+                        
+                        # Find branch and department
+                        branch = None
+                        department = None
+                        
+                        if row.get('Branche', '').strip():
+                            branch = Branch.query.filter_by(name=row.get('Branche', '').strip()).first()
+                            if not branch:
+                                errors.append(f"Ligne {row_num}: Branche '{row.get('Branche', '').strip()}' introuvable")
+                                continue
+                        
+                        if row.get('Département', '').strip():
+                            department = Department.query.filter_by(name=row.get('Département', '').strip()).first()
+                            if not department:
+                                errors.append(f"Ligne {row_num}: Département '{row.get('Département', '').strip()}' introuvable")
+                                continue
+                        
+                        # Create user first
+                        user = User(
+                            name=row.get('Nom', '').strip(),
+                            email=row.get('Email', '').strip(),
+                            password='default123',  # Should be hashed in production
+                            type='employee'
+                        )
+                        db.session.add(user)
+                        db.session.flush()
+                        
+                        # Parse dates
+                        company_doj = None
+                        date_of_birth = None
+                        
+                        if row.get('Date d\'embauche', '').strip():
+                            try:
+                                company_doj = datetime.strptime(row.get('Date d\'embauche', '').strip(), '%d/%m/%Y')
+                            except ValueError:
+                                errors.append(f"Ligne {row_num}: Format de date d'embauche invalide (utilisez JJ/MM/AAAA)")
+                                continue
+                        
+                        if row.get('Date de naissance', '').strip():
+                            try:
+                                date_of_birth = datetime.strptime(row.get('Date de naissance', '').strip(), '%d/%m/%Y')
+                            except ValueError:
+                                errors.append(f"Ligne {row_num}: Format de date de naissance invalide (utilisez JJ/MM/AAAA)")
+                                continue
+                        
+                        # Parse salary
+                        salary = None
+                        if row.get('Salaire', '').strip():
+                            try:
+                                salary = float(row.get('Salaire', '').strip())
+                            except ValueError:
+                                errors.append(f"Ligne {row_num}: Format de salaire invalide")
+                                continue
+                        
+                        # Create employee
+                        employee = Employee(
+                            user_id=user.id,
+                            name=row.get('Nom', '').strip(),
+                            cin=row.get('CIN', '').strip(),
+                            phone=row.get('Téléphone', '').strip(),
+                            address=row.get('Adresse', '').strip(),
+                            email=row.get('Email', '').strip(),
+                            employee_id=row.get('ID Employé', '').strip(),
+                            branch_id=branch.id if branch else None,
+                            department_id=department.id if department else None,
+                            company_doj=company_doj,
+                            salary=salary,
+                            date_of_birth=date_of_birth,
+                            gender=row.get('Genre', '').strip(),
+                            marital_status=row.get('Statut matrimonial', '').strip(),
+                            nationality=row.get('Nationalité', '').strip(),
+                            blood_group=row.get('Groupe sanguin', '').strip(),
+                            contract_type=row.get('Type de contrat', '').strip(),
+                            employment_status=row.get('Statut d\'emploi', '').strip(),
+                            created_by=1,
+                            is_active=1
+                        )
+                        db.session.add(employee)
+                        imported_count += 1
+                        
+                    except Exception as e:
+                        errors.append(f"Ligne {row_num}: Erreur - {str(e)}")
+                        continue
+                
+                if imported_count > 0:
+                    db.session.commit()
+                    flash(f'{imported_count} employé(s) importé(s) avec succès!', 'success')
+                else:
+                    db.session.rollback()
+                
+                if errors:
+                    flash('Erreurs d\'importation:', 'warning')
+                    for error in errors[:10]:  # Show only first 10 errors
+                        flash(f'• {error}', 'warning')
+                    if len(errors) > 10:
+                        flash(f'... et {len(errors) - 10} autres erreurs', 'warning')
+                
+                return redirect(url_for('employees_list'))
+                
+            except Exception as e:
+                flash(f'Erreur lors de la lecture du fichier: {str(e)}', 'error')
+                return redirect(request.url)
+        else:
+            flash('Veuillez sélectionner un fichier CSV', 'error')
+            return redirect(request.url)
+    
+    return render_template('employees/import.html')
+
+@app.route('/employees/import-template')
+def employees_import_template():
+    """Download CSV template for employee import"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header with example data
+    writer.writerow([
+        'ID Employé', 'Nom', 'CIN', 'Téléphone', 'Adresse', 'Email',
+        'Branche', 'Département', 'Date d\'embauche', 'Salaire',
+        'Date de naissance', 'Genre', 'Statut matrimonial', 'Nationalité',
+        'Groupe sanguin', 'Type de contrat', 'Statut d\'emploi'
+    ])
+    
+    # Add example row
+    writer.writerow([
+        'EMP001', 'Ahmed Alami', 'AB123456', '+212612345678', 
+        '123 Rue Hassan II, Casablanca', 'ahmed.alami@ceramica.ma',
+        'Casablanca', 'Ressources Humaines', '01/01/2024', '8000',
+        '15/05/1990', 'Masculin', 'Marié', 'Marocaine',
+        'O+', 'CDI', 'Actif'
+    ])
+    
+    output.seek(0)
+    
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=modele_import_employes.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8"
+    
+    return response
 
 @app.route('/employees/create', methods=['GET', 'POST'])
 def employees_create():

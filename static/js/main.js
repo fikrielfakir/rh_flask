@@ -53,7 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTabletFormValidation();
 
     // Touch-friendly search functionality
-    setupTouchSearchHandlers();
+    if (typeof setupTouchSearchHandlers === 'function') {
+        setupTouchSearchHandlers();
+    }
 
     // Print functionality
     setupPrintHandlers();
