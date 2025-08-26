@@ -59,7 +59,7 @@ class EmployeeForm(FlaskForm):
     branch_id = SelectField('Branche', coerce=int, validators=[DataRequired()])
     department_id = SelectField('Département', coerce=int, validators=[DataRequired()])
     designation_id = SelectField('Poste', coerce=int, validators=[DataRequired()])
-    manager_id = SelectField('Manager', coerce=int, validators=[Optional()])
+    manager_id = SelectField('Manager', coerce=lambda x: int(x) if x else None, validators=[Optional()])
     company_doj = DateField('Date d\'Embauche', validators=[Optional()])
     work_location = StringField('Lieu de Travail', validators=[Optional(), Length(max=191)])
     work_phone = StringField('Téléphone Professionnel', validators=[Optional(), Length(max=20)])
@@ -110,7 +110,7 @@ class EmployeeForm(FlaskForm):
         self.department_id.choices = [(d.id, f"{d.name} ({d.branch.name})") for d in Department.query.join(Branch).all()]
         self.designation_id.choices = [(d.id, f"{d.name} ({d.department.name})") for d in Designation.query.join(Department).all()]
         # Managers are employees who can manage others
-        self.manager_id.choices = [('', 'Aucun Manager')] + [(e.id, f"{e.name} ({e.employee_id})") for e in Employee.query.filter_by(is_active=1).all()]
+        self.manager_id.choices = [(None, 'Aucun Manager')] + [(e.id, f"{e.name} ({e.employee_id})") for e in Employee.query.filter_by(is_active=1).all()]
 
 class EmergencyContactForm(FlaskForm):
     name = StringField('Nom Complet', validators=[DataRequired(), Length(min=2, max=191)])
