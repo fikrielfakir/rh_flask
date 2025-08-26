@@ -23,6 +23,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "postgres
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "connect_args": {
+        "client_encoding": "utf8"
+    }
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
