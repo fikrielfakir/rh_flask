@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Employés - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-users"></i> Liste des Employés
+            </h1>
+            <a href="{{ url_for('employees_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvel Employé
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form method="GET" class="d-flex">
+            <input type="text" name="search" value="{{ search }}" class="form-control me-2" 
+                   placeholder="Rechercher par nom, ID ou email...">
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="fas fa-search"></i>
+            </button>
+            {% if search %}
+            <a href="{{ url_for('employees_list') }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Employees Table -->
+<div class="card">
+    <div class="card-body">
+        {% if employees.items %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Employé</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Branche</th>
+                        <th>Département</th>
+                        <th>Salaire</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees.items %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary">{{ employee.employee_id }}</span>
+                        </td>
+                        <td>{{ employee.name }}</td>
+                        <td>{{ employee.email }}</td>
+                        <td>{{ employee.branch.name if employee.branch else '-' }}</td>
+                        <td>{{ employee.department.name if employee.department else '-' }}</td>
+                        <td>
+                            {% if employee.salary %}
+                                {{ "%.2f"|format(employee.salary) }} MAD
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('employees_view', id=employee.id) }}" 
+                                   class="btn btn-outline-info" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('employees_edit', id=employee.id) }}" 
+                                   class="btn btn-outline-warning" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if employees.pages > 1 %}
+        <nav aria-label="Pagination des employés">
+            <ul class="pagination justify-content-center">
+                {% if employees.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('employees_list', page=employees.prev_num, search=search) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in employees.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != employees.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('employees_list', page=page_num, search=search) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if employees.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('employees_list', page=employees.next_num, search=search) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h4>Aucun employé trouvé</h4>
+            <p class="text-muted">
+                {% if search %}
+                    Aucun employé ne correspond à votre recherche "{{ search }}".
+                {% else %}
+                    Il n'y a pas encore d'employés dans le système.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('employees_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter le Premier Employé
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

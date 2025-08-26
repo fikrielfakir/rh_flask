@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de Bord - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h2 mb-4">
+            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_employees }}</h4>
+                        <p class="card-text">Employés Actifs</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ present_today }}</h4>
+                        <p class="card-text">Présents Aujourd'hui</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_departments }}</h4>
+                        <p class="card-text">Départements</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-sitemap fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ payroll_this_month }}</h4>
+                        <p class="card-text">Bulletins ce Mois</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-money-bill fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt"></i> Actions Rapides
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('employees_create') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Nouvel Employé
+                    </a>
+                    <a href="{{ url_for('attendance_create') }}" class="btn btn-success">
+                        <i class="fas fa-clock"></i> Enregistrer Présence
+                    </a>
+                    <a href="{{ url_for('payroll_create') }}" class="btn btn-info">
+                        <i class="fas fa-receipt"></i> Générer Bulletin de Paie
+                    </a>
+                    <a href="{{ url_for('reports_dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-chart-line"></i> Voir les Rapports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Informations Système
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Branches:</strong> {{ total_branches }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Départements:</strong> {{ total_departments }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Employés Actifs:</strong> {{ total_employees }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Date:</strong> {{ current_date }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any dashboard-specific JavaScript here
+    console.log('Dashboard loaded successfully');
+});
+</script>
+{% endblock %}

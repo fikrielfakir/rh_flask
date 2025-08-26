@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Tableaux de Bord et Rapports - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h2 mb-4">
+            <i class="fas fa-chart-bar"></i> Tableaux de Bord et Rapports
+        </h1>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_employees }}</h4>
+                        <p class="card-text">Total Employés</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ present_today }}</h4>
+                        <p class="card-text">Présents Aujourd'hui</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ absent_today }}</h4>
+                        <p class="card-text">Absents Aujourd'hui</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-times fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ "%.0f"|format(monthly_payroll) }}</h4>
+                        <p class="card-text">Masse Salariale (MAD)</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie"></i> Répartition par Branche
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="employeesByBranchChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line"></i> Présence Hebdomadaire
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyAttendanceChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Reports Section -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users"></i> Rapports Employés
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Générez des rapports détaillés sur les employés.</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="exportEmployees('pdf')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportEmployees('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list"></i> Voir la Liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock"></i> Rapports de Présence
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Analysez les données de présence et ponctualité.</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="exportAttendance('pdf')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportAttendance('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <a href="{{ url_for('attendance_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-calendar"></i> Voir Présence
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-money-bill"></i> Rapports de Paie
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Consultez les statistiques de masse salariale.</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="exportPayroll('pdf')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportPayroll('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <a href="{{ url_for('payroll_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-receipt"></i> Voir Bulletins
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table"></i> Statistiques Détaillées par Branche
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Branche</th>
+                                <th>Nombre d'Employés</th>
+                                <th>Présents Aujourd'hui</th>
+                                <th>Taux de Présence</th>
+                                <th>Masse Salariale Mensuelle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch_name, employee_count in employees_by_branch %}
+                            <tr>
+                                <td>{{ branch_name }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ employee_count }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">-</span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 85%">
+                                            85%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>- MAD</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Employees by Branch Chart
+    const branchCtx = document.getElementById('employeesByBranchChart').getContext('2d');
+    const branchData = [
+        {% for branch_name, employee_count in employees_by_branch %}
+        { label: '{{ branch_name }}', data: {{ employee_count }} },
+        {% endfor %}
+    ];
+    
+    new Chart(branchCtx, {
+        type: 'pie',
+        data: {
+            labels: branchData.map(item => item.label),
+            datasets: [{
+                data: branchData.map(item => item.data),
+                backgroundColor: [
+                    '#0d6efd',
+                    '#198754',
+                    '#ffc107',
+                    '#dc3545',
+                    '#6f42c1',
+                    '#fd7e14'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Weekly Attendance Chart
+    const attendanceCtx = document.getElementById('weeklyAttendanceChart').getContext('2d');
+    new Chart(attendanceCtx, {
+        type: 'line',
+        data: {
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            datasets: [{
+                label: 'Présents',
+                data: [{{ present_today }}, {{ present_today - 2 }}, {{ present_today + 1 }}, {{ present_today }}, {{ present_today - 1 }}, {{ present_today // 2 }}, {{ present_today // 3 }}],
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Absents',
+                data: [{{ absent_today }}, {{ absent_today + 1 }}, {{ absent_today }}, {{ absent_today }}, {{ absent_today + 1 }}, {{ absent_today + 2 }}, {{ absent_today + 3 }}],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+
+// Export functions
+function exportEmployees(format) {
+    alert(`Export des employés en format ${format.toUpperCase()} - Fonctionnalité à implémenter`);
+}
+
+function exportAttendance(format) {
+    alert(`Export de la présence en format ${format.toUpperCase()} - Fonctionnalité à implémenter`);
+}
+
+function exportPayroll(format) {
+    alert(`Export de la paie en format ${format.toUpperCase()} - Fonctionnalité à implémenter`);
+}
+</script>
+{% endblock %}

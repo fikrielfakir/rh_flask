@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Départements - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-sitemap"></i> Départements
+            </h1>
+            <a href="{{ url_for('departments_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouveau Département
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if departments %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nom du Département</th>
+                        <th>Branche</th>
+                        <th>Nombre d'Employés</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for department in departments %}
+                    <tr>
+                        <td>{{ department.name }}</td>
+                        <td>{{ department.branch.name }}</td>
+                        <td>
+                            <span class="badge bg-info">
+                                {{ department.employees|length }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-warning" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+            <h4>Aucun département trouvé</h4>
+            <p class="text-muted">Il n'y a pas encore de départements dans le système.</p>
+            <a href="{{ url_for('departments_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Créer le Premier Département
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

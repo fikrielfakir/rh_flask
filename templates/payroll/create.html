@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Générer Bulletin de Paie - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-receipt"></i> Générer Bulletin de Paie
+            </h1>
+            <a href="{{ url_for('payroll_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la Liste
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" novalidate id="payrollForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Employee and Period -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.employee_id.label(class="form-label") }}
+                                {{ form.employee_id(class="form-select" + (" is-invalid" if form.employee_id.errors else ""), onchange="loadEmployeeSalary()") }}
+                                {% if form.employee_id.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.employee_id.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.salary_month.label(class="form-label") }}
+                                {{ form.salary_month(class="form-control" + (" is-invalid" if form.salary_month.errors else ""), placeholder="MM/YYYY (ex: 01/2024)") }}
+                                {% if form.salary_month.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.salary_month.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Earnings Section -->
+                            <div class="card bg-success bg-opacity-10 mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0 text-success">
+                                        <i class="fas fa-plus-circle"></i> Gains
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        {{ form.basic_salary.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.basic_salary(class="form-control" + (" is-invalid" if form.basic_salary.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.basic_salary.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.basic_salary.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        {{ form.allowance.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.allowance(class="form-control" + (" is-invalid" if form.allowance.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.allowance.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.allowance.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        {{ form.commission.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.commission(class="form-control" + (" is-invalid" if form.commission.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.commission.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.commission.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        {{ form.other_payment.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.other_payment(class="form-control" + (" is-invalid" if form.other_payment.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.other_payment.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.other_payment.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        {{ form.overtime.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.overtime(class="form-control" + (" is-invalid" if form.overtime.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.overtime.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.overtime.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Deductions Section -->
+                            <div class="card bg-danger bg-opacity-10 mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0 text-danger">
+                                        <i class="fas fa-minus-circle"></i> Déductions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        {{ form.loan.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.loan(class="form-control" + (" is-invalid" if form.loan.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.loan.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.loan.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        {{ form.saturation_deduction.label(class="form-label") }}
+                                        <div class="input-group">
+                                            {{ form.saturation_deduction(class="form-control" + (" is-invalid" if form.saturation_deduction.errors else ""), onchange="calculateTotal()") }}
+                                            <span class="input-group-text">MAD</span>
+                                        </div>
+                                        {% if form.saturation_deduction.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.saturation_deduction.errors[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary Section -->
+                            <div class="card bg-info bg-opacity-10">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0 text-info">
+                                        <i class="fas fa-calculator"></i> Résumé
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Total Gains:</span>
+                                        <span id="totalEarnings">0.00 MAD</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Total Déductions:</span>
+                                        <span id="totalDeductions">0.00 MAD</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Net à Payer:</strong>
+                                        <strong id="netPay" class="text-primary">0.00 MAD</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('payroll_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Générer le Bulletin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function calculateTotal() {
+    const basicSalary = parseFloat(document.getElementById('basic_salary').value) || 0;
+    const allowance = parseFloat(document.getElementById('allowance').value) || 0;
+    const commission = parseFloat(document.getElementById('commission').value) || 0;
+    const otherPayment = parseFloat(document.getElementById('other_payment').value) || 0;
+    const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+    
+    const loan = parseFloat(document.getElementById('loan').value) || 0;
+    const saturationDeduction = parseFloat(document.getElementById('saturation_deduction').value) || 0;
+    
+    const totalEarnings = basicSalary + allowance + commission + otherPayment + overtime;
+    const totalDeductions = loan + saturationDeduction;
+    const netPay = totalEarnings - totalDeductions;
+    
+    document.getElementById('totalEarnings').textContent = totalEarnings.toFixed(2) + ' MAD';
+    document.getElementById('totalDeductions').textContent = totalDeductions.toFixed(2) + ' MAD';
+    document.getElementById('netPay').textContent = netPay.toFixed(2) + ' MAD';
+}
+
+function loadEmployeeSalary() {
+    // This would typically fetch employee's base salary via AJAX
+    // For now, we'll just trigger the calculation
+    calculateTotal();
+}
+
+// Set current month by default
+document.addEventListener('DOMContentLoaded', function() {
+    const salaryMonthField = document.getElementById('salary_month');
+    if (!salaryMonthField.value) {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        salaryMonthField.value = `${month}/${year}`;
+    }
+    
+    // Calculate total on page load
+    calculateTotal();
+});
+</script>
+{% endblock %}

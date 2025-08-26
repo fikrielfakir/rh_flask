@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Enregistrer Présence - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-clock"></i> Enregistrer Présence
+            </h1>
+            <a href="{{ url_for('attendance_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la Liste
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.employee_id.label(class="form-label") }}
+                                {{ form.employee_id(class="form-select" + (" is-invalid" if form.employee_id.errors else "")) }}
+                                {% if form.employee_id.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.employee_id.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.date.label(class="form-label") }}
+                                {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else "")) }}
+                                {% if form.date.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.date.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.status.label(class="form-label") }}
+                        {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                        {% if form.status.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.status.errors[0] }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.clock_in.label(class="form-label") }}
+                                {{ form.clock_in(class="form-control" + (" is-invalid" if form.clock_in.errors else "")) }}
+                                {% if form.clock_in.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.clock_in.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.clock_out.label(class="form-label") }}
+                                {{ form.clock_out(class="form-control" + (" is-invalid" if form.clock_out.errors else "")) }}
+                                {% if form.clock_out.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.clock_out.errors[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Time Buttons -->
+                    <div class="mb-4">
+                        <label class="form-label">Heures Rapides:</label>
+                        <div class="btn-group d-block" role="group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTime('08:00', 'clock_in')">8h00</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTime('09:00', 'clock_in')">9h00</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTime('17:00', 'clock_out')">17h00</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTime('18:00', 'clock_out')">18h00</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="setCurrentTime()">Maintenant</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('attendance_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer Présence
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setTime(time, field) {
+    document.getElementById(field).value = time;
+}
+
+function setCurrentTime() {
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0, 5);
+    
+    // Set current time to clock_in if it's empty, otherwise to clock_out
+    const clockIn = document.getElementById('clock_in');
+    const clockOut = document.getElementById('clock_out');
+    
+    if (!clockIn.value) {
+        clockIn.value = timeString;
+    } else {
+        clockOut.value = timeString;
+    }
+}
+
+// Set today's date by default
+document.addEventListener('DOMContentLoaded', function() {
+    const dateField = document.getElementById('date');
+    if (!dateField.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = today;
+    }
+});
+</script>
+{% endblock %}

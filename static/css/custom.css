@@ -1,0 +1,284 @@
+/* Custom styles for Ceramica HR Management System */
+
+/* Override only when necessary - Bootstrap theme handles most styling */
+
+/* Loading states and transitions */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Enhanced form styling */
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Custom badge styles for status indicators */
+.badge-status {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .navbar,
+    .btn,
+    .pagination,
+    footer {
+        display: none !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Enhanced table responsiveness */
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Custom spacing utilities - minimal additions to Bootstrap */
+.py-6 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+}
+
+/* Enhanced card hover effects */
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-active {
+    background-color: var(--bs-success);
+}
+
+.status-inactive {
+    background-color: var(--bs-danger);
+}
+
+.status-pending {
+    background-color: var(--bs-warning);
+}
+
+/* Timeline styling for employee history */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: var(--bs-border-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 0.25rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+}
+
+/* Enhanced dashboard cards */
+.dashboard-card {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-rgb) 100%);
+    border: none;
+    color: white;
+}
+
+.dashboard-card .card-body {
+    padding: 1.5rem;
+}
+
+.dashboard-card h4 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+/* Employee avatar placeholder */
+.employee-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bs-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+/* Quick action buttons */
+.quick-actions {
+    position: sticky;
+    top: 2rem;
+    z-index: 1000;
+}
+
+/* Enhanced form sections */
+.form-section {
+    background: var(--bs-light);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--bs-primary);
+}
+
+/* Payroll summary styling */
+.payroll-summary {
+    background: linear-gradient(135deg, var(--bs-success) 0%, rgba(25, 135, 84, 0.8) 100%);
+    color: white;
+    border-radius: 0.5rem;
+}
+
+.payroll-summary .h5 {
+    font-weight: 600;
+}
+
+/* Attendance status colors */
+.attendance-present {
+    color: var(--bs-success) !important;
+    font-weight: 600;
+}
+
+.attendance-absent {
+    color: var(--bs-danger) !important;
+    font-weight: 600;
+}
+
+.attendance-late {
+    color: var(--bs-warning) !important;
+    font-weight: 600;
+}
+
+.attendance-half-day {
+    color: var(--bs-info) !important;
+    font-weight: 600;
+}
+
+/* Mobile responsiveness enhancements */
+@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .dashboard-card h4 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Dark theme specific adjustments */
+[data-bs-theme="dark"] .form-section {
+    background: var(--bs-dark);
+    border-left-color: var(--bs-info);
+}
+
+[data-bs-theme="dark"] .timeline::before {
+    background: var(--bs-border-color-translucent);
+}
+
+[data-bs-theme="dark"] .table th {
+    color: var(--bs-light);
+}
+
+/* Chart container styling */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+/* Error and success message enhancements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, var(--bs-success), rgba(25, 135, 84, 0.8));
+    color: white;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, var(--bs-danger), rgba(220, 53, 69, 0.8));
+    color: white;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, var(--bs-warning), rgba(255, 193, 7, 0.8));
+    color: var(--bs-dark);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, var(--bs-info), rgba(13, 202, 240, 0.8));
+    color: white;
+}

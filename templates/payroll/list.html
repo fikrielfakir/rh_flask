@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Bulletins de Paie - Système RH{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="fas fa-money-bill"></i> Bulletins de Paie
+            </h1>
+            <a href="{{ url_for('payroll_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Générer Bulletin
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if payrolls.items %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Employé</th>
+                        <th>Période</th>
+                        <th>Salaire de Base</th>
+                        <th>Indemnités</th>
+                        <th>Déductions</th>
+                        <th>Net à Payer</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payroll in payrolls.items %}
+                    <tr>
+                        <td>
+                            <strong>{{ payroll.employee.name }}</strong><br>
+                            <small class="text-muted">{{ payroll.employee.employee_id }}</small>
+                        </td>
+                        <td>{{ payroll.salary_month }}</td>
+                        <td>{{ "%.2f"|format(payroll.basic_salary) }} MAD</td>
+                        <td>{{ "%.2f"|format(payroll.allowance + payroll.commission + payroll.other_payment + payroll.overtime) }} MAD</td>
+                        <td>{{ "%.2f"|format(payroll.loan + payroll.saturation_deduction) }} MAD</td>
+                        <td>
+                            <strong>{{ "%.2f"|format(payroll.net_payble) }} MAD</strong>
+                        </td>
+                        <td>
+                            {% if payroll.status == 1 %}
+                                <span class="badge bg-success">Payé</span>
+                            {% else %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-info" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if payrolls.pages > 1 %}
+        <nav aria-label="Pagination des bulletins">
+            <ul class="pagination justify-content-center">
+                {% if payrolls.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('payroll_list', page=payrolls.prev_num) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in payrolls.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != payrolls.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('payroll_list', page=page_num) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if payrolls.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('payroll_list', page=payrolls.next_num) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-money-bill fa-3x text-muted mb-3"></i>
+            <h4>Aucun bulletin de paie trouvé</h4>
+            <p class="text-muted">Il n'y a pas encore de bulletins de paie générés.</p>
+            <a href="{{ url_for('payroll_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Générer le Premier Bulletin
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
