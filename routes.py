@@ -693,42 +693,35 @@ def payroll_create():
     form = PayrollForm()
     if form.validate_on_submit():
         try:
-            # Import the payroll calculator
-            from payroll_calculator import calculate_employee_payslip
+            # Import the simplified payroll calculator
+            from simple_payroll_calculator import calculate_simple_payslip
             
             # Get form data
             employee_id = form.employee_id.data
             salary_month = form.salary_month.data
             
-            # Prepare calculation data (these could come from forms or database)
-            attendance_data = {
-                'days_worked': 26,  # This could come from attendance records
-                'holiday_days': 0
-            }
+            # Convert overtime amount to hours (approximate)
+            overtime_amount = float(form.overtime.data or 0)
+            employee = Employee.query.get(employee_id)
+            if employee and employee.salary:
+                hourly_rate = float(employee.salary) / 191  # Standard monthly hours
+                overtime_hours = overtime_amount / (hourly_rate * 1.25) if hourly_rate > 0 else 0
+            else:
+                overtime_hours = 0
             
-            overtime_data = {
-                'regular_overtime_hours': float(form.overtime.data or 0) / 8,  # Convert amount to hours estimate
-                'weekend_overtime_hours': 0,
-                'holiday_overtime_hours': 0
-            }
+            leave_allowance = float(form.allowance.data or 0)
             
-            leave_data = {
-                'approved_leave_days': 0,
-                'holiday_days': 0,
-                'worked_on_holidays': False
-            }
-            
-            # Calculate payslip using Moroccan labor law
-            payslip, errors = calculate_employee_payslip(
+            # Calculate payslip using simplified Moroccan labor law calculator
+            payslip, errors = calculate_simple_payslip(
                 employee_id, 
                 salary_month, 
-                attendance_data, 
-                overtime_data, 
-                leave_data
+                overtime_hours, 
+                leave_allowance
             )
             
             if payslip:
-                flash('Fiche de paie calculée et créée avec succès selon la loi marocaine!', 'success')
+                flash('Fiche de paie calculée avec succès selon la loi marocaine!', 'success')
+                flash('Incluant: bonus ancienneté, contributions sociales (CNSS/AMO/CIMR), et impôt progressif', 'info')
                 if errors:
                     for error in errors:
                         flash(f'Avertissement: {error}', 'warning')
@@ -759,7 +752,7 @@ def payroll_calculate_batch():
         return redirect(url_for('payroll_list'))
     
     try:
-        from payroll_calculator import calculate_employee_payslip
+        from simple_payroll_calculator import calculate_simple_payslip
         
         # Get all active employees
         employees = Employee.query.filter_by(is_active=1).all()
@@ -768,17 +761,12 @@ def payroll_calculate_batch():
         
         for employee in employees:
             try:
-                # Basic attendance data (this could be enhanced to get real attendance)
-                attendance_data = {'days_worked': 26, 'holiday_days': 0}
-                overtime_data = {'regular_overtime_hours': 0, 'weekend_overtime_hours': 0, 'holiday_overtime_hours': 0}
-                leave_data = {'approved_leave_days': 0, 'holiday_days': 0, 'worked_on_holidays': False}
-                
-                payslip, errors = calculate_employee_payslip(
+                # Basic calculation with no overtime or special allowances for batch
+                payslip, errors = calculate_simple_payslip(
                     employee.id, 
                     salary_month, 
-                    attendance_data, 
-                    overtime_data, 
-                    leave_data
+                    overtime_hours=0, 
+                    leave_allowance=0
                 )
                 
                 if payslip:
@@ -789,7 +777,8 @@ def payroll_calculate_batch():
             except Exception as e:
                 total_errors.append(f"{employee.name}: {str(e)}")
         
-        flash(f'{successful_calculations} fiches de paie calculées avec succès!', 'success')
+        flash(f'{successful_calculations} fiches de paie calculées avec succès selon la loi marocaine!', 'success')
+        flash('Calculs incluant: bonus ancienneté, CNSS/AMO/CIMR, et impôt progressif', 'info')
         if total_errors:
             flash(f'{len(total_errors)} erreurs rencontrées lors du calcul', 'warning')
             

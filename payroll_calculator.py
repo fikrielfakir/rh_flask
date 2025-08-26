@@ -112,7 +112,7 @@ class MoroccanPayrollCalculator:
     
     def _calculate_basic_salary(self, attendance_data):
         """Calculate basic salary based on attendance"""
-        base_salary = Decimal(str(self.employee.salary or 0))
+        basic_salary = Decimal(str(self.employee.salary or 0))
         
         # Get attendance data for the month
         if attendance_data:
@@ -124,11 +124,11 @@ class MoroccanPayrollCalculator:
         
         # Calculate actual working hours
         actual_working_hours = (days_worked - holiday_days) * Decimal('7.3461538462')
-        hourly_rate = base_salary / self.STANDARD_MONTHLY_HOURS
+        hourly_rate = basic_salary / self.STANDARD_MONTHLY_HOURS
         monthly_salary = hourly_rate * actual_working_hours
         
         self.payslip_data.update({
-            'base_salary': base_salary,
+            'basic_salary': basic_salary,
             'days_worked': days_worked,
             'actual_working_hours': actual_working_hours,
             'monthly_salary': monthly_salary.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
@@ -136,7 +136,7 @@ class MoroccanPayrollCalculator:
     
     def _calculate_leave_and_holidays(self, leave_data):
         """Calculate paid leave and holiday payments"""
-        base_salary = self.payslip_data['base_salary']
+        basic_salary = self.payslip_data['basic_salary']
         
         if leave_data:
             leave_days = leave_data.get('approved_leave_days', 0)
@@ -150,12 +150,12 @@ class MoroccanPayrollCalculator:
         # Paid Leave Calculation
         paid_leave_amount = Decimal('0')
         if leave_days > 0:
-            paid_leave_amount = (Decimal(str(leave_days)) * base_salary) / Decimal(str(self.MAX_WORKING_DAYS))
+            paid_leave_amount = (Decimal(str(leave_days)) * basic_salary) / Decimal(str(self.MAX_WORKING_DAYS))
         
         # Paid Holiday Calculation (only if didn't work on holidays)
         paid_holiday_amount = Decimal('0')
         if holiday_days > 0 and not worked_on_holidays:
-            paid_holiday_amount = (Decimal(str(holiday_days)) * base_salary) / Decimal(str(self.MAX_WORKING_DAYS))
+            paid_holiday_amount = (Decimal(str(holiday_days)) * basic_salary) / Decimal(str(self.MAX_WORKING_DAYS))
         
         self.payslip_data.update({
             'leave_days': leave_days,
@@ -166,8 +166,8 @@ class MoroccanPayrollCalculator:
     
     def _calculate_overtime(self, overtime_data):
         """Calculate overtime payments with different rates"""
-        base_salary = self.payslip_data['base_salary']
-        hourly_rate = base_salary / self.STANDARD_MONTHLY_HOURS
+        basic_salary = self.payslip_data['basic_salary']
+        hourly_rate = basic_salary / self.STANDARD_MONTHLY_HOURS
         
         if overtime_data:
             regular_hours = Decimal(str(overtime_data.get('regular_overtime_hours', 0)))
