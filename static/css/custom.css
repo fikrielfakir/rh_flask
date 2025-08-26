@@ -109,10 +109,23 @@ h1, h2, h3, h4, h5, h6 {
 
 .card-header {
     background: linear-gradient(135deg, var(--ceramica-primary) 0%, var(--ceramica-primary-light) 100%);
-    color: white;
+    color: white !important;
     border: none;
     padding: 1.25rem var(--tablet-padding);
     border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Force white text color for all elements within card headers */
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6,
+.card-header .card-title,
+.card-header *:not(.btn):not(.badge) {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .card-body {
