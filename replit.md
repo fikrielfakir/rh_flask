@@ -5,6 +5,7 @@ This is an HR Management System ("Système RH") for Ceramica, a French-language 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Design preferences: Modern, tablet-friendly design with blue color scheme (#003E9C), touch-optimized interface.
 
 # System Architecture
 

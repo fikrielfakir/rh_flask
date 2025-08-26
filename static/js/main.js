@@ -2,47 +2,143 @@
 // Handles common functionality across all pages
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
+    // Tablet-optimized initialization
+    initializeTabletFeatures();
+    
+    // Initialize tooltips with touch support
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            trigger: 'hover focus',
+            delay: { show: 300, hide: 100 }
+        });
     });
 
-    // Initialize popovers
+    // Initialize popovers with tablet optimization
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
+        return new bootstrap.Popover(popoverTriggerEl, {
+            trigger: 'click',
+            placement: 'auto'
+        });
     });
 
-    // Auto-hide alerts after 5 seconds
+    // Enhanced alerts with touch-friendly close
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function(alert) {
+        // Add touch-friendly close behavior
+        const closeBtn = alert.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.style.minWidth = '44px';
+            closeBtn.style.minHeight = '44px';
+        }
+        
+        // Auto-hide after 7 seconds (longer for tablet users)
         setTimeout(function() {
             const bsAlert = new bootstrap.Alert(alert);
             if (bsAlert) {
                 bsAlert.close();
             }
-        }, 5000);
+        }, 7000);
     });
+
+    // Touch-optimized card interactions
+    setupTouchCardInteractions();
 
     // Initialize current time display
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
 
-    // Form validation enhancements
-    setupFormValidation();
+    // Enhanced form validation for touch
+    setupTabletFormValidation();
 
-    // Search functionality
-    setupSearchHandlers();
+    // Touch-friendly search functionality
+    setupTouchSearchHandlers();
 
     // Print functionality
     setupPrintHandlers();
 
-    // Data table enhancements
-    setupDataTableEnhancements();
+    // Tablet-optimized data tables
+    setupTabletDataTables();
+
+    // Performance optimizations
+    setupPerformanceOptimizations();
 
     console.log('Ceramica HR System initialized successfully');
 });
+
+/**
+ * Initialize tablet-specific features
+ */
+function initializeTabletFeatures() {
+    // Detect if device supports touch
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    if (isTouch) {
+        document.body.classList.add('touch-device');
+        
+        // Add touch-friendly hover states
+        document.querySelectorAll('.card, .btn, .quick-action-card').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.classList.add('touch-active');
+            });
+            
+            el.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.classList.remove('touch-active');
+                }, 150);
+            });
+        });
+    }
+    
+    // Optimize for tablet viewport
+    if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
+        document.body.classList.add('tablet-device');
+    }
+}
+
+/**
+ * Setup touch-optimized card interactions
+ */
+function setupTouchCardInteractions() {
+    const actionCards = document.querySelectorAll('.quick-action-card');
+    
+    actionCards.forEach(card => {
+        // Add ripple effect for touch feedback
+        card.addEventListener('touchstart', function(e) {
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.touches[0].clientX - rect.left - size / 2;
+            const y = e.touches[0].clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+        
+        // Prevent double-tap zoom on action cards
+        card.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            // Trigger click after a short delay to ensure touch feedback
+            setTimeout(() => {
+                if (this.href) {
+                    window.location.href = this.href;
+                } else {
+                    this.click();
+                }
+            }, 100);
+        });
+    });
+}
 
 /**
  * Updates the current time display if element exists
@@ -65,12 +161,26 @@ function updateCurrentTime() {
 }
 
 /**
- * Enhanced form validation
+ * Tablet-optimized form validation
  */
-function setupFormValidation() {
-    const forms = document.querySelectorAll('.needs-validation');
+function setupTabletFormValidation() {
+    const forms = document.querySelectorAll('.needs-validation, form');
     
     forms.forEach(function(form) {
+        // Make form inputs more touch-friendly
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            // Ensure minimum touch target size
+            if (input.offsetHeight < 44) {
+                input.style.minHeight = '44px';
+            }
+            
+            // Add focus enhancement for touch devices
+            input.addEventListener('focus', function() {
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+        
         form.addEventListener('submit', function(event) {
             if (!form.checkValidity()) {
                 event.preventDefault();
