@@ -1,0 +1,182 @@
+# Payslip Calculation System - Complete Guide
+
+## Overview
+This system calculates employee payslips based on Moroccan labor law, including social security contributions (CNSS), health insurance (AMO), retirement contributions (CIMR), and income tax (IR).
+
+## 1. Basic Salary Components
+
+### Base Salary Calculation
+- **Base Monthly Salary**: Employee's fixed monthly salary
+- **Working Days**: Maximum 26 days per month
+- **Daily Rate**: Base salary ÷ 191 hours (standard monthly hours)
+- **Actual Days Worked**: Attendance records for the current month
+
+### Attendance-Based Salary
+```
+Actual Working Hours = (Days Worked - Holiday Days) × 7.3461538462
+Hourly Rate = Base Salary ÷ 191
+Monthly Salary = Hourly Rate × Actual Working Hours
+```
+
+## 2. Leave and Holiday Calculations
+
+### Paid Leave
+- **Calculation**: (Leave Days × Base Salary) ÷ 26
+- **Condition**: Only approved leave is considered
+- **Exclusions**: Sundays are not counted as leave days
+- **Holiday Overlap**: Leave days overlapping with holidays are handled separately
+
+### Paid Holidays
+- **Calculation**: (Holiday Days × Base Salary) ÷ 26
+- **Condition**: Only if employee didn't work during holidays
+- **Working on Holidays**: If employee worked, holiday pay is not added (overtime applies instead)
+
+## 3. Overtime Calculations
+
+The system recognizes three types of overtime with different rates:
+
+### Overtime Categories
+1. **Regular Overtime (+25%)**: Normal working days
+2. **Weekend/Holiday Overtime (+50%)**: Sundays OR holidays
+3. **Weekend + Holiday Overtime (+100%)**: Sundays AND holidays
+
+### Overtime Payment Formula
+```
+Hourly Rate = Base Salary ÷ 191
+Overtime Payment = Hours × Hourly Rate × (1 + Rate)
+
+Examples:
+- 25% Overtime: Hours × Hourly Rate × 1.25
+- 50% Overtime: Hours × Hourly Rate × 1.50
+- 100% Overtime: Hours × Hourly Rate × 2.00
+```
+
+## 4. Taxable Basic Salary
+
+The foundation for all tax calculations:
+```
+Taxable Basic Salary = Monthly Salary + All Overtime Payments + Paid Leave + Paid Holidays
+```
+
+## 5. Seniority Bonus
+
+Based on years of service since company joining date:
+
+| Years of Service | Bonus Rate | Applied to |
+|-----------------|------------|------------|
+| 2-5 years       | 5%         | Taxable Basic Salary |
+| 5-12 years      | 10%        | Taxable Basic Salary |
+| 12-20 years     | 15%        | Taxable Basic Salary |
+| 20-25 years     | 20%        | Taxable Basic Salary |
+| 25+ years       | 25%        | Taxable Basic Salary |
+
+## 6. Gross Salary Components
+
+### Gross Salary Calculation
+```
+Gross Salary = Taxable Basic Salary + Taxable Allowances
+Gross Taxable Salary = Gross Salary - Non-Taxable Allowances
+```
+
+### Allowances
+- **Taxable Allowances**: Added to gross salary, subject to tax
+- **Non-Taxable Allowances**: Not subject to income tax or social contributions
+
+## 7. Social Security Contributions (Deductions)
+
+### CNSS (National Social Security Fund)
+- **Rate**: 4.48% (configurable)
+- **Ceiling**: Maximum 6,000 MAD per month
+- **Calculation**: Min(Gross Taxable Salary, 6000) × 4.48%
+
+### AMO (Mandatory Health Insurance)
+- **Rate**: 2.26% (configurable)
+- **Ceiling**: No limit
+- **Calculation**: Gross Taxable Salary × 2.26%
+
+### CIMR (Retirement Fund)
+- **Rate**: 7% (configurable)
+- **Ceiling**: No limit
+- **Calculation**: Gross Taxable Salary × 7%
+
+### Professional Expenses (Frais Professionnels)
+- **Rate**: 35% if Taxable Basic Salary ≤ 6,500 MAD
+- **Rate**: 25% if Taxable Basic Salary > 6,500 MAD
+- **Calculation**: Gross Taxable Salary × Rate
+
+## 8. Net Taxable Salary
+
+```
+Net Taxable Salary = Gross Taxable Salary - CNSS - AMO - CIMR - Professional Expenses
+```
+
+## 9. Income Tax (IR) Calculation
+
+### Tax Brackets (Progressive)
+| Net Taxable Salary Range | Rate | Deduction |
+|-------------------------|------|-----------|
+| ≤ 2,500                | 0%   | 0         |
+| 2,501 - 4,166          | 10%  | 250       |
+| 4,167 - 5,000          | 20%  | 666.67    |
+| 5,001 - 6,666          | 30%  | 1,166.67  |
+| 6,667 - 15,000         | 34%  | 1,433.33  |
+| > 15,000               | 38%  | 2,033.33  |
+
+### Tax Calculation Formula
+```
+Gross IR = (Net Taxable Salary × Rate) - Deduction
+```
+
+### Family Allowance Deduction
+- **Married**: 30 MAD base allowance
+- **Per Child**: 30 MAD per child
+- **Total Family Allowance**: 30 + (Number of Children × 30)
+
+### Final IR Calculation
+```
+Net IR = Gross IR - Family Allowance
+If Net IR < 0, then Net IR = 0
+```
+
+## 10. Final Net Salary
+
+```
+Total Deductions = AMO + CNSS + CIMR + Net IR
+Net Salary = Gross Taxable Salary - Total Deductions
+Net Payable = Net Salary - Advance Payments - Loans
+```
+
+## 11. System Automation Features
+
+### Automatic Record Creation
+The system automatically creates/updates:
+- **Allowances**: Seniority bonus, family allowance
+- **Deductions**: CNSS, AMO, CIMR, professional expenses, IR
+- **Overtime**: All three categories with proper rates
+- **Other Payments**: Gross IR for reporting
+
+### Retirement Event Creation
+- Automatically creates calendar events when employees are within 60 days of retirement (age 60)
+- Prevents duplicate retirement events
+
+## 12. Key Business Rules
+
+1. **Working Days**: Maximum 26 days per month considered
+2. **Standard Hours**: 191 hours per month for calculations
+3. **Sunday Exclusion**: Sundays not counted in leave calculations
+4. **Holiday Priority**: Working on holidays triggers overtime instead of holiday pay
+5. **CNSS Ceiling**: Maximum contribution based on 6,000 MAD salary
+6. **Tax Exemption**: Family allowances reduce income tax
+7. **Negative Tax Prevention**: IR cannot be negative after family allowances
+
+## 13. Configuration Points
+
+The system allows configuration of:
+- CNSS contribution rate (default: 4.48%)
+- AMO contribution rate (default: 2.26%)
+- CIMR contribution rate (default: 7%)
+- Overtime rates (25%, 50%, 100%)
+- Professional expenses rates (25%/35%)
+- Family allowance amounts (30 MAD each)
+
+This comprehensive system ensures accurate payroll calculations while maintaining compliance with Moroccan labor and tax regulations.
