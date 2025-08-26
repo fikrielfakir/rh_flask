@@ -98,72 +98,6 @@ def employees_list():
     
     return render_template('employees/list.html', employees=employees, search=search)
 
-@app.route('/employees/create', methods=['GET', 'POST'])
-def employees_create():
-    form = EmployeeForm()
-    if form.validate_on_submit():
-        # Create user first
-        user = User(
-            name=form.name.data,
-            email=form.email.data,
-            password='default123',  # Should be hashed in production
-            type='employee'
-        )
-        db.session.add(user)
-        db.session.flush()  # Get the user ID
-        
-        # Create employee
-        employee = Employee(
-            user_id=user.id,
-            name=form.name.data,
-            cin=form.cin.data,
-            phone=form.phone.data,
-            address=form.address.data,
-            email=form.email.data,
-            employee_id=form.employee_id.data,
-            branch_id=form.branch_id.data,
-            department_id=form.department_id.data,
-            designation_id=form.designation_id.data,
-            company_doj=form.company_doj.data,
-            account_holder_name=form.account_holder_name.data,
-            account_number=form.account_number.data,
-            bank_name=form.bank_name.data,
-            bank_identifier_code=form.bank_identifier_code.data,
-            branch_location=form.branch_location.data,
-            tax_payer_id=form.tax_payer_id.data,
-            salary_type=form.salary_type.data,
-            salary=form.salary.data,
-            created_by=1,
-            # Enhanced fields
-            date_of_birth=form.date_of_birth.data,
-            gender=form.gender.data,
-            marital_status=form.marital_status.data,
-            nationality=form.nationality.data,
-            blood_group=form.blood_group.data,
-            contract_type=form.contract_type.data,
-            employment_status=form.employment_status.data,
-            manager_id=form.manager_id.data if form.manager_id.data else None,
-            work_location=form.work_location.data,
-            work_phone=form.work_phone.data,
-            probation_period_months=form.probation_period_months.data,
-            notice_period_days=form.notice_period_days.data,
-            weekly_working_hours=form.weekly_working_hours.data,
-            overtime_eligible=form.overtime_eligible.data,
-            health_insurance=form.health_insurance.data,
-            life_insurance=form.life_insurance.data,
-            annual_leave_days=form.annual_leave_days.data,
-            sick_leave_days=form.sick_leave_days.data,
-            personal_leave_days=form.personal_leave_days.data,
-            skills=form.skills.data,
-            languages=form.languages.data,
-            certifications=form.certifications.data
-        )
-        db.session.add(employee)
-        db.session.commit()
-        flash('Employé créé avec succès!', 'success')
-        return redirect(url_for('employees_view', id=employee.id))
-    return render_template('employees/create.html', form=form)
-
 @app.route('/employees/<int:id>')
 def employees_view(id):
     employee = Employee.query.get_or_404(id)
@@ -407,6 +341,72 @@ def employees_dashboard():
                          recent_reviews=recent_reviews,
                          recent_leaves=recent_leaves)
 
+@app.route('/employees/create', methods=['GET', 'POST'])
+def employees_create():
+    form = EmployeeForm()
+    if form.validate_on_submit():
+        # Create user first
+        user = User(
+            name=form.name.data,
+            email=form.email.data,
+            password='default123',  # Should be hashed in production
+            type='employee'
+        )
+        db.session.add(user)
+        db.session.flush()  # Get the user ID
+        
+        # Create employee
+        employee = Employee(
+            user_id=user.id,
+            name=form.name.data,
+            cin=form.cin.data,
+            phone=form.phone.data,
+            address=form.address.data,
+            email=form.email.data,
+            employee_id=form.employee_id.data,
+            branch_id=form.branch_id.data,
+            department_id=form.department_id.data,
+            designation_id=form.designation_id.data,
+            company_doj=form.company_doj.data,
+            account_holder_name=form.account_holder_name.data,
+            account_number=form.account_number.data,
+            bank_name=form.bank_name.data,
+            bank_identifier_code=form.bank_identifier_code.data,
+            branch_location=form.branch_location.data,
+            tax_payer_id=form.tax_payer_id.data,
+            salary_type=form.salary_type.data,
+            salary=form.salary.data,
+            created_by=1,
+            # Enhanced fields
+            date_of_birth=form.date_of_birth.data,
+            gender=form.gender.data,
+            marital_status=form.marital_status.data,
+            nationality=form.nationality.data,
+            blood_group=form.blood_group.data,
+            contract_type=form.contract_type.data,
+            employment_status=form.employment_status.data,
+            manager_id=form.manager_id.data if form.manager_id.data else None,
+            work_location=form.work_location.data,
+            work_phone=form.work_phone.data,
+            probation_period_months=form.probation_period_months.data,
+            notice_period_days=form.notice_period_days.data,
+            weekly_working_hours=form.weekly_working_hours.data,
+            overtime_eligible=form.overtime_eligible.data,
+            health_insurance=form.health_insurance.data,
+            life_insurance=form.life_insurance.data,
+            annual_leave_days=form.annual_leave_days.data,
+            sick_leave_days=form.sick_leave_days.data,
+            personal_leave_days=form.personal_leave_days.data,
+            skills=form.skills.data,
+            languages=form.languages.data,
+            certifications=form.certifications.data
+        )
+        db.session.add(employee)
+        db.session.commit()
+        flash('Employé créé avec succès!', 'success')
+        return redirect(url_for('employees_view', id=employee.id))
+    return render_template('employees/create.html', form=form)
+
 # Attendance routes
 @app.route('/attendance')
 def attendance_list():
@@ -488,11 +488,47 @@ def payroll_create():
             saturation_deduction=saturation_deduction,
             other_payment=other_payment,
             overtime=overtime,
-            net_payable=net_payable,
+            net_payble=net_payable,
             created_by=1
         )
         db.session.add(payroll)
         db.session.commit()
-        flash('Fiche de paie créée avec succès!', 'success')
+        flash('Bulletin de paie créé avec succès!', 'success')
         return redirect(url_for('payroll_list'))
     return render_template('payroll/create.html', form=form)
+
+# Reports and Dashboard
+@app.route('/reports/dashboard')
+def reports_dashboard():
+    # Employee statistics
+    total_employees = Employee.query.filter_by(is_active=1).count()
+    employees_by_branch = db.session.query(
+        Branch.name, func.count(Employee.id)
+    ).join(Employee).group_by(Branch.id, Branch.name).all()
+    
+    # Attendance statistics
+    today = datetime.now().date()
+    present_today = AttendanceEmployee.query.filter_by(date=today, status='present').count()
+    absent_today = AttendanceEmployee.query.filter_by(date=today, status='absent').count()
+    
+    # Monthly payroll
+    current_month = datetime.now().strftime('%m/%Y')
+    monthly_payroll = db.session.query(
+        func.sum(PaySlip.net_payble)
+    ).filter_by(salary_month=current_month).scalar() or 0
+    
+    return render_template('reports/dashboard.html',
+                         total_employees=total_employees,
+                         employees_by_branch=employees_by_branch,
+                         present_today=present_today,
+                         absent_today=absent_today,
+                         monthly_payroll=monthly_payroll)
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500

@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Profil - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Employee Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="avatar bg-white text-primary">
+                                <i class="fas fa-user fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="mb-1">{{ employee.name }}</h3>
+                            <p class="mb-1">{{ employee.designation.name if employee.designation else 'Non assigné' }}</p>
+                            <p class="mb-0 opacity-75">
+                                <i class="fas fa-id-card me-2"></i>{{ employee.employee_id }}
+                                {% if employee.department %}
+                                    <span class="mx-2">|</span>
+                                    <i class="fas fa-building me-2"></i>{{ employee.department.name }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('employees_edit', id=employee.id) }}" class="btn btn-light">
+                                    <i class="fas fa-edit me-2"></i>Modifier
+                                </a>
+                                <a href="{{ url_for('employees_list') }}" class="btn btn-outline-light">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user me-2"></i>Informations Personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item mb-3">
+                        <label class="info-label">Email</label>
+                        <p class="info-value">{{ employee.email or 'Non renseigné' }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="info-label">Téléphone</label>
+                        <p class="info-value">{{ employee.phone or 'Non renseigné' }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="info-label">CIN</label>
+                        <p class="info-value">{{ employee.cin or 'Non renseigné' }}</p>
+                    </div>
+                    {% if employee.date_of_birth %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Date de Naissance</label>
+                        <p class="info-value">{{ employee.date_of_birth.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                    {% endif %}
+                    {% if employee.gender %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Genre</label>
+                        <p class="info-value">{{ 'Homme' if employee.gender == 'male' else 'Femme' if employee.gender == 'female' else employee.gender }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Adresse</label>
+                        <p class="info-value">{{ employee.address or 'Non renseignée' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-briefcase me-2"></i>Informations Professionnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item mb-3">
+                        <label class="info-label">Date d'Embauche</label>
+                        <p class="info-value">
+                            {% if employee.company_doj %}
+                                {{ employee.company_doj.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                Non renseignée
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="info-label">Branche</label>
+                        <p class="info-value">{{ employee.branch.name if employee.branch else 'Non assignée' }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="info-label">Département</label>
+                        <p class="info-value">{{ employee.department.name if employee.department else 'Non assigné' }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="info-label">Poste</label>
+                        <p class="info-value">{{ employee.designation.name if employee.designation else 'Non assigné' }}</p>
+                    </div>
+                    {% if employee.manager %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Manager</label>
+                        <p class="info-value">{{ employee.manager.name }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Statut</label>
+                        <span class="badge bg-{{ 'success' if employee.employment_status == 'active' else 'warning' if employee.employment_status == 'inactive' else 'danger' }}">
+                            {{ employee.employment_status or 'Actif' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Statistiques Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="stat-item">
+                                <h4 class="text-primary">{{ performance_reviews|length }}</h4>
+                                <small class="text-muted">Évaluations</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stat-item">
+                                <h4 class="text-success">{{ leave_requests|length }}</h4>
+                                <small class="text-muted">Congés</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-info">{{ trainings|length }}</h4>
+                                <small class="text-muted">Formations</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-warning">{{ documents|length }}</h4>
+                                <small class="text-muted">Documents</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Sections -->
+    <div class="row">
+        <!-- Emergency Contacts -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-phone me-2"></i>Contacts d'Urgence</h5>
+                    <a href="{{ url_for('emergency_contacts_add', employee_id=employee.id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if emergency_contacts %}
+                        {% for contact in emergency_contacts %}
+                        <div class="contact-item mb-3 p-3 border rounded">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ contact.name }}</h6>
+                                    <p class="text-muted mb-1">{{ contact.relationship }}</p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-phone me-2"></i>{{ contact.phone }}
+                                        {% if contact.email %}
+                                            <br><i class="fas fa-envelope me-2"></i>{{ contact.email }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                {% if contact.is_primary %}
+                                    <span class="badge bg-primary">Principal</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucun contact d'urgence enregistré.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-file-alt me-2"></i>Documents</h5>
+                    <a href="{{ url_for('documents_upload', employee_id=employee.id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-upload me-1"></i>Télécharger
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                        {% for document in documents %}
+                        <div class="document-item mb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file me-2"></i>
+                                <strong>{{ document.document_name }}</strong>
+                                <small class="text-muted">({{ document.document_type }})</small>
+                                {% if document.expiry_date %}
+                                    <br><small class="text-warning">Expire le {{ document.expiry_date.strftime('%d/%m/%Y') }}</small>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if document.is_verified %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-clock text-warning"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucun document téléchargé.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance and Activities -->
+    <div class="row">
+        <!-- Recent Performance Reviews -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-star me-2"></i>Évaluations de Performance</h5>
+                    <a href="{{ url_for('performance_reviews_create') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Nouvelle Évaluation
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if performance_reviews %}
+                        {% for review in performance_reviews[:3] %}
+                        <div class="review-item mb-3 p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Période: {{ review.review_period_start.strftime('%m/%Y') }} - {{ review.review_period_end.strftime('%m/%Y') }}</h6>
+                                    <div class="rating mb-2">
+                                        {% for i in range(5) %}
+                                            {% if i < review.overall_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-muted"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-2">{{ review.overall_rating }}/5</span>
+                                    </div>
+                                    <small class="text-muted">Par {{ review.reviewer.name if review.reviewer else 'N/A' }}</small>
+                                </div>
+                                <span class="badge bg-{{ 'success' if review.status == 'approved' else 'warning' if review.status == 'submitted' else 'secondary' }}">
+                                    {{ review.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if performance_reviews|length > 3 %}
+                            <a href="{{ url_for('performance_reviews_list') }}?employee={{ employee.id }}" class="btn btn-sm btn-outline-primary">
+                                Voir toutes les évaluations
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted">Aucune évaluation de performance.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Leave Requests -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Demandes de Congé</h5>
+                    <a href="{{ url_for('leave_requests_create') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Nouvelle Demande
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if leave_requests %}
+                        {% for request in leave_requests %}
+                        <div class="leave-item mb-3 p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ request.leave_type|title }}</h6>
+                                    <p class="mb-1">{{ request.start_date.strftime('%d/%m/%Y') }} - {{ request.end_date.strftime('%d/%m/%Y') }}</p>
+                                    <small class="text-muted">{{ request.days_requested }} jour(s)</small>
+                                </div>
+                                <span class="badge bg-{{ 'success' if request.status == 'approved' else 'warning' if request.status == 'pending' else 'danger' }}">
+                                    {{ request.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucune demande de congé.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-graduation-cap me-2"></i>Historique des Formations</h5>
+                    <a href="{{ url_for('trainings_create') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Nouvelle Formation
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if trainings %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Formation</th>
+                                        <th>Type</th>
+                                        <th>Période</th>
+                                        <th>Durée</th>
+                                        <th>Statut</th>
+                                        <th>Certification</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for training in trainings %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ training.training_title }}</strong>
+                                            {% if training.training_provider %}
+                                                <br><small class="text-muted">{{ training.training_provider }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ training.training_type|title }}</td>
+                                        <td>
+                                            {% if training.start_date %}
+                                                {{ training.start_date.strftime('%d/%m/%Y') }}
+                                                {% if training.end_date %}
+                                                    - {{ training.end_date.strftime('%d/%m/%Y') }}
+                                                {% endif %}
+                                            {% else %}
+                                                Non programmée
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ training.duration_hours or 'N/A' }}h</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if training.status == 'completed' else 'primary' if training.status == 'ongoing' else 'secondary' }}">
+                                                {{ training.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if training.certification_received %}
+                                                <i class="fas fa-certificate text-warning"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-muted"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Aucune formation enregistrée.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.info-value {
+    margin-bottom: 0;
+    color: #495057;
+}
+
+.stat-item h4 {
+    margin-bottom: 0.25rem;
+}
+
+.contact-item {
+    background-color: #f8f9fa;
+}
+
+.document-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.document-item:last-child {
+    border-bottom: none;
+}
+
+.review-item, .leave-item {
+    background-color: #f8f9fa;
+}
+
+.rating .fas.fa-star {
+    color: #ffc107;
+}
+
+.rating .far.fa-star {
+    color: #dee2e6;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}

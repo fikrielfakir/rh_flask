@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de Bord Employés{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-chart-bar me-2"></i>Tableau de Bord Employés</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('employees_create') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Nouvel Employé
+                    </a>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Liste des Employés
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Employés
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_employees }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Nouveaux ce Mois
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ new_employees_this_month }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Performance Moyenne
+                            </div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ avg_performance }}/5</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: {{ (avg_performance/5)*100 }}%" 
+                                             aria-valuenow="{{ avg_performance }}" aria-valuemin="0" aria-valuemax="5">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Congés en Attente
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_leaves }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-times fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                Formations en Cours
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ ongoing_trainings }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Formations Terminées
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ completed_trainings }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-certificate fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Congés Approuvés ce Mois
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ approved_leaves_this_month }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Recent Employees -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Employés Récents</h6>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-sm btn-outline-primary">Voir Tous</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_employees %}
+                        {% for employee in recent_employees %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="mr-3">
+                                <div class="icon-circle bg-primary">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="h6 mb-0">
+                                    <a href="{{ url_for('employees_view', id=employee.id) }}" class="text-decoration-none">
+                                        {{ employee.name }}
+                                    </a>
+                                </div>
+                                <div class="small text-gray-500">
+                                    {{ employee.designation.name if employee.designation else 'Poste non assigné' }} •
+                                    {{ employee.created_at.strftime('%d/%m/%Y') }}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="badge badge-{{ 'success' if employee.employment_status == 'active' else 'secondary' }}">
+                                    {{ employee.employment_status or 'active' }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucun employé récent.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Performance Reviews -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-success">Évaluations Récentes</h6>
+                    <a href="{{ url_for('performance_reviews_list') }}" class="btn btn-sm btn-outline-success">Voir Toutes</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_reviews %}
+                        {% for review in recent_reviews %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="mr-3">
+                                <div class="icon-circle bg-success">
+                                    <i class="fas fa-star text-white"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="h6 mb-0">{{ review.employee.name }}</div>
+                                <div class="small text-gray-500">
+                                    Période: {{ review.review_period_start.strftime('%m/%Y') }} - {{ review.review_period_end.strftime('%m/%Y') }}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="rating">
+                                    {% for i in range(5) %}
+                                        {% if i < review.overall_rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="small text-gray-500">{{ review.overall_rating }}/5</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune évaluation récente.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Leave Requests -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-warning">Demandes de Congé Récentes</h6>
+                    <a href="{{ url_for('leave_requests_list') }}" class="btn btn-sm btn-outline-warning">Voir Toutes</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_leaves %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Employé</th>
+                                        <th>Type de Congé</th>
+                                        <th>Période</th>
+                                        <th>Jours</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for leave in recent_leaves %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('employees_view', id=leave.employee.id) }}" class="text-decoration-none">
+                                                {{ leave.employee.name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ leave.leave_type|title }}</td>
+                                        <td>{{ leave.start_date.strftime('%d/%m/%Y') }} - {{ leave.end_date.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ leave.days_requested }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ 'success' if leave.status == 'approved' else 'warning' if leave.status == 'pending' else 'danger' }}">
+                                                {{ leave.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if leave.status == 'pending' %}
+                                                <a href="{{ url_for('leave_requests_approve', id=leave.id) }}" class="btn btn-sm btn-success me-1">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="{{ url_for('leave_requests_reject', id=leave.id) }}" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Aucune demande de congé récente.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions Rapides</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('employees_create') }}" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-user-plus mb-2"></i><br>
+                                Nouvel Employé
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('performance_reviews_create') }}" class="btn btn-success btn-lg btn-block">
+                                <i class="fas fa-star mb-2"></i><br>
+                                Nouvelle Évaluation
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('leave_requests_create') }}" class="btn btn-warning btn-lg btn-block">
+                                <i class="fas fa-calendar-alt mb-2"></i><br>
+                                Demande de Congé
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('trainings_create') }}" class="btn btn-info btn-lg btn-block">
+                                <i class="fas fa-graduation-cap mb-2"></i><br>
+                                Nouvelle Formation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.border-left-secondary {
+    border-left: 0.25rem solid #858796 !important;
+}
+
+.icon-circle {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rating .fas.fa-star {
+    color: #f6c23e;
+}
+
+.rating .far.fa-star {
+    color: #d1d3e2;
+}
+
+.progress-sm {
+    height: 0.5rem;
+}
+
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+
+.text-gray-500 {
+    color: #858796 !important;
+}
+
+.text-gray-800 {
+    color: #3a3b45 !important;
+}
+
+.badge-success {
+    background-color: #1cc88a;
+}
+
+.badge-warning {
+    background-color: #f6c23e;
+}
+
+.badge-danger {
+    background-color: #e74a3b;
+}
+
+.badge-secondary {
+    background-color: #858796;
+}
+</style>
+{% endblock %}

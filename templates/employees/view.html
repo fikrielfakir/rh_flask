@@ -1,201 +1,395 @@
 {% extends "base.html" %}
 
-{% block title %}{{ employee.name }} - Système RH{% endblock %}
+{% block title %}{{ employee.name }} - Détails Employé{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2">
-                <i class="fas fa-user"></i> {{ employee.name }}
-                <span class="badge bg-secondary ms-2">{{ employee.employee_id }}</span>
-            </h1>
-            <div>
-                <a href="{{ url_for('employees_edit', id=employee.id) }}" class="btn btn-warning me-2">
-                    <i class="fas fa-edit"></i> Modifier
-                </a>
-                <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour à la Liste
-                </a>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user me-2"></i>{{ employee.name }}</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('employees_profile', id=employee.id) }}" class="btn btn-success">
+                        <i class="fas fa-user-circle me-2"></i>Profil Complet
+                    </a>
+                    <a href="{{ url_for('employees_edit', id=employee.id) }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <a href="{{ url_for('employees_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-8">
-        <!-- Personal Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-user"></i> Informations Personnelles
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Nom Complet:</strong> {{ employee.name }}</p>
-                        <p><strong>CIN:</strong> {{ employee.cin or 'Non renseigné' }}</p>
-                        <p><strong>Email:</strong> {{ employee.email or 'Non renseigné' }}</p>
-                        <p><strong>Téléphone:</strong> {{ employee.phone or 'Non renseigné' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>ID Employé:</strong> {{ employee.employee_id }}</p>
-                        <p><strong>Date d'Embauche:</strong> 
-                            {{ employee.company_doj.strftime('%d/%m/%Y') if employee.company_doj else 'Non renseignée' }}
-                        </p>
-                        <p><strong>Statut:</strong> 
-                            {% if employee.is_active %}
-                                <span class="badge bg-success">Actif</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactif</span>
-                            {% endif %}
-                        </p>
+    <div class="row">
+        <!-- Basic Information Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de Base
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-muted" style="width: 40%;">ID Employé:</td>
+                                    <td>{{ employee.employee_id }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Email:</td>
+                                    <td>{{ employee.email }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Téléphone:</td>
+                                    <td>{{ employee.phone or 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">CIN:</td>
+                                    <td>{{ employee.cin or 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Adresse:</td>
+                                    <td>{{ employee.address or 'Non renseignée' }}</td>
+                                </tr>
+                                {% if employee.date_of_birth %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Date de Naissance:</td>
+                                    <td>{{ employee.date_of_birth.strftime('%d/%m/%Y') }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.gender %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Genre:</td>
+                                    <td>{{ 'Homme' if employee.gender == 'male' else 'Femme' if employee.gender == 'female' else employee.gender }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.nationality %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Nationalité:</td>
+                                    <td>{{ employee.nationality }}</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                {% if employee.address %}
-                <div class="row">
-                    <div class="col-12">
-                        <p><strong>Adresse:</strong> {{ employee.address }}</p>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
 
-        <!-- Organizational Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-building"></i> Informations Organisationnelles
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Branche:</strong> 
-                            {{ employee.branch.name if employee.branch else 'Non assignée' }}
-                        </p>
-                        <p><strong>Département:</strong> 
-                            {{ employee.department.name if employee.department else 'Non assigné' }}
-                        </p>
+        <!-- Professional Information Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Informations Professionnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-muted" style="width: 40%;">Date d'Embauche:</td>
+                                    <td>
+                                        {% if employee.company_doj %}
+                                            {{ employee.company_doj.strftime('%d/%m/%Y') }}
+                                        {% else %}
+                                            Non renseignée
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Branche:</td>
+                                    <td>
+                                        {% if employee.branch %}
+                                            <span class="badge bg-primary">{{ employee.branch.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Non assignée</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Département:</td>
+                                    <td>
+                                        {% if employee.department %}
+                                            <span class="badge bg-info">{{ employee.department.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Poste:</td>
+                                    <td>
+                                        {% if employee.designation %}
+                                            <span class="badge bg-success">{{ employee.designation.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if employee.manager %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Manager:</td>
+                                    <td>
+                                        <a href="{{ url_for('employees_view', id=employee.manager.id) }}" class="text-decoration-none">
+                                            {{ employee.manager.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.work_location %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Lieu de Travail:</td>
+                                    <td>{{ employee.work_location }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Statut:</td>
+                                    <td>
+                                        {% if employee.employment_status == 'active' %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% elif employee.employment_status == 'inactive' %}
+                                            <span class="badge bg-warning">Inactif</span>
+                                        {% elif employee.employment_status == 'suspended' %}
+                                            <span class="badge bg-danger">Suspendu</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Poste:</strong> 
-                            {{ employee.designation.name if employee.designation else 'Non assigné' }}
-                        </p>
-                        <p><strong>Type de Salaire:</strong> 
-                            {% if employee.salary_type == 'monthly' %}Mensuel{% elif employee.salary_type == 'hourly' %}Horaire{% else %}Non défini{% endif %}
-                        </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contract Information -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-contract me-2"></i>Informations Contractuelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                {% if employee.contract_type %}
+                                <tr>
+                                    <td class="fw-bold text-muted" style="width: 50%;">Type de Contrat:</td>
+                                    <td>{{ employee.contract_type|title }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.probation_period_months %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Période d'Essai:</td>
+                                    <td>{{ employee.probation_period_months }} mois</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.notice_period_days %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Préavis:</td>
+                                    <td>{{ employee.notice_period_days }} jours</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.weekly_working_hours %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Heures/Semaine:</td>
+                                    <td>{{ employee.weekly_working_hours }}h</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Avantages:</td>
+                                    <td>
+                                        {% if employee.health_insurance %}
+                                            <span class="badge bg-success me-1">Assurance Santé</span>
+                                        {% endif %}
+                                        {% if employee.life_insurance %}
+                                            <span class="badge bg-success me-1">Assurance Vie</span>
+                                        {% endif %}
+                                        {% if employee.overtime_eligible %}
+                                            <span class="badge bg-info me-1">Heures Sup.</span>
+                                        {% endif %}
+                                        {% if not (employee.health_insurance or employee.life_insurance or employee.overtime_eligible) %}
+                                            <span class="text-muted">Aucun</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if employee.annual_leave_days or employee.sick_leave_days or employee.personal_leave_days %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Jours de Congé:</td>
+                                    <td>
+                                        {% if employee.annual_leave_days %}
+                                            Annuel: {{ employee.annual_leave_days }} jours<br>
+                                        {% endif %}
+                                        {% if employee.sick_leave_days %}
+                                            Maladie: {{ employee.sick_leave_days }} jours<br>
+                                        {% endif %}
+                                        {% if employee.personal_leave_days %}
+                                            Personnel: {{ employee.personal_leave_days }} jours
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Salary Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-money-bill"></i> Informations Salariales
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Salaire:</strong> 
-                            {% if employee.salary %}
-                                {{ "%.2f"|format(employee.salary) }} MAD
-                            {% else %}
-                                Non défini
-                            {% endif %}
-                        </p>
-                        <p><strong>Numéro Fiscal:</strong> {{ employee.tax_payer_id or 'Non renseigné' }}</p>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>Informations Salariales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-muted" style="width: 40%;">Type de Salaire:</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'primary' if employee.salary_type == 'monthly' else 'info' }}">
+                                            {{ 'Mensuel' if employee.salary_type == 'monthly' else 'Horaire' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-muted">Salaire:</td>
+                                    <td>
+                                        <span class="h5 text-success">
+                                            {{ "{:,.2f}".format(employee.salary) }} MAD
+                                        </span>
+                                        {% if employee.salary_type == 'monthly' %}
+                                            <small class="text-muted">/mois</small>
+                                        {% else %}
+                                            <small class="text-muted">/heure</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if employee.account_holder_name %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Compte Bancaire:</td>
+                                    <td>{{ employee.account_holder_name }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.bank_name %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Banque:</td>
+                                    <td>{{ employee.bank_name }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.account_number %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Numéro de Compte:</td>
+                                    <td>{{ employee.account_number }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if employee.tax_payer_id %}
+                                <tr>
+                                    <td class="fw-bold text-muted">Numéro Fiscal:</td>
+                                    <td>{{ employee.tax_payer_id }}</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Bank Information -->
-        {% if employee.account_holder_name or employee.account_number or employee.bank_name %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-university"></i> Informations Bancaires
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Titulaire du Compte:</strong> {{ employee.account_holder_name or 'Non renseigné' }}</p>
-                        <p><strong>Numéro de Compte:</strong> {{ employee.account_number or 'Non renseigné' }}</p>
-                        <p><strong>Nom de la Banque:</strong> {{ employee.bank_name or 'Non renseigné' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Code BIC:</strong> {{ employee.bank_identifier_code or 'Non renseigné' }}</p>
-                        <p><strong>Agence:</strong> {{ employee.branch_location or 'Non renseignée' }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
-    <div class="col-md-4">
-        <!-- Quick Actions -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-bolt"></i> Actions Rapides
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('attendance_create') }}?employee={{ employee.id }}" class="btn btn-primary">
-                        <i class="fas fa-clock"></i> Enregistrer Présence
-                    </a>
-                    <a href="{{ url_for('payroll_create') }}?employee={{ employee.id }}" class="btn btn-success">
-                        <i class="fas fa-receipt"></i> Générer Bulletin de Paie
-                    </a>
-                    <button class="btn btn-info" onclick="printEmployee()">
-                        <i class="fas fa-print"></i> Imprimer Fiche
-                    </button>
+    <!-- Skills and Additional Information -->
+    {% if employee.skills or employee.languages or employee.certifications %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Compétences et Certifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if employee.skills %}
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-primary">Compétences</h6>
+                            {% set skills_list = employee.skills.split(',') %}
+                            {% for skill in skills_list %}
+                                <span class="badge bg-primary me-1 mb-1">{{ skill.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if employee.languages %}
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-info">Langues</h6>
+                            {% set languages_list = employee.languages.split(',') %}
+                            {% for language in languages_list %}
+                                <span class="badge bg-info me-1 mb-1">{{ language.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if employee.certifications %}
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-success">Certifications</h6>
+                            <div class="text-muted">
+                                {{ employee.certifications|replace('\n', '<br>')|safe }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+    {% endif %}
 
-        <!-- Recent Activity -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-history"></i> Activité Récente
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if employee.attendance_records %}
-                    <h6>Dernières Présences:</h6>
-                    <ul class="list-unstyled">
-                        {% for attendance in employee.attendance_records[:5] %}
-                        <li class="mb-2">
-                            <small class="text-muted">{{ attendance.date.strftime('%d/%m/%Y') }}</small><br>
-                            <span class="badge bg-{{ 'success' if attendance.status == 'present' else 'warning' }}">
-                                {{ attendance.status }}
-                            </span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">Aucune activité récente</p>
-                {% endif %}
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Actions Rapides</h6>
+                    <div class="btn-group me-2" role="group">
+                        <a href="{{ url_for('emergency_contacts_add', employee_id=employee.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-phone me-1"></i>Ajouter Contact d'Urgence
+                        </a>
+                        <a href="{{ url_for('documents_upload', employee_id=employee.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-upload me-1"></i>Télécharger Document
+                        </a>
+                    </div>
+                    <div class="btn-group me-2" role="group">
+                        <a href="{{ url_for('performance_reviews_create') }}?employee_id={{ employee.id }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-star me-1"></i>Évaluer Performance
+                        </a>
+                        <a href="{{ url_for('leave_requests_create') }}?employee_id={{ employee.id }}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-calendar-alt me-1"></i>Demande de Congé
+                        </a>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('trainings_create') }}?employee_id={{ employee.id }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-graduation-cap me-1"></i>Ajouter Formation
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-function printEmployee() {
-    window.print();
-}
-</script>
 {% endblock %}
